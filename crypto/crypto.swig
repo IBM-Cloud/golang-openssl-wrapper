@@ -9,3 +9,4 @@
 
 /* From openssl/crypto.h */
 extern int FIPS_mode_set(int r);
+extern int FIPS_mode(void);
