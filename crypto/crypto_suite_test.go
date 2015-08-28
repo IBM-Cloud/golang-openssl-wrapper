@@ -1,4 +1,4 @@
-package openssl_test
+package crypto_test
 
 import (
 	. "github.com/onsi/ginkgo"
@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestOpenssl(t *testing.T) {
+func TestCrypto(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Openssl Suite")
+	RunSpecs(t, "Crypto Suite")
 }
