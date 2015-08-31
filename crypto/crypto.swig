@@ -48,6 +48,14 @@ extern void ERR_load_crypto_strings(void);
 extern void ERR_free_strings(void);
 
 /*
+ * From openssl/engine.h
+ */
+
+/* Types */
+
+typedef struct engine_st ENGINE;
+
+/*
  * From openssl/evp.h
  */
 
@@ -115,6 +123,15 @@ extern EVP_CIPHER_CTX *EVP_CIPHER_CTX_new(void);
 extern void EVP_CIPHER_CTX_init(EVP_CIPHER_CTX *a);
 extern int EVP_CIPHER_CTX_cleanup(EVP_CIPHER_CTX *a);
 
+/*
+ * As of now, for the standard use of EVP_EncryptInit_ex(), in which you pass null in for the engine,
+ * you would pass in SwigcptrStruct_SS_engine_st(0) in go.  At some point we should make the API cleaner.
+ * Example:
+ * r := EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), SwigcptrStruct_SS_engine_st(0), "somekey", "someiv")
+ */
+extern int EVP_EncryptInit_ex(EVP_CIPHER_CTX *ctx, const EVP_CIPHER *type,
+	 ENGINE *impl, unsigned char *key, unsigned char *iv);
+
 /*%apply unsigned char *OUTPUT {unsigned char *out};
 %apply int *OUTPUT {int *outl};
 %rename(wrapped_EVP_EncryptUpdate) EVP_EncryptUpdate(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl, unsigned char *in, int intl);
@@ -133,3 +150,7 @@ func EVP_EncryptUpdate(ctx EVP_CIPHER_CTX, plaintext string) (encrypted string, 
 	return bytes.NewBuffer(buf_encrypt).String(), nil
 }
 %} */
+
+
+/* Ciphers */
+const EVP_CIPHER *EVP_aes_256_cbc(void);

@@ -20,12 +20,21 @@ var _ = Describe("Crypto", func() {
 		})
 	})
 
-	Describe("Managing a cipher context", func() {
+	Describe("Performing symmetric encryption", func() {
 		Context("Initializing and freeing the context", func() {
 			It("should return indicating success", func() {
 				ctx := EVP_CIPHER_CTX_new()
 				EVP_CIPHER_CTX_init(ctx)
 				Expect(EVP_CIPHER_CTX_cleanup(ctx)).To(Equal(1))
+			})
+		})
+
+		Context("Initializing EVP", func() {
+			It("Should return indicating success", func() {
+				ctx := EVP_CIPHER_CTX_new()
+				EVP_CIPHER_CTX_init(ctx)
+				Expect(EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), SwigcptrStruct_SS_engine_st(0), "somekey", "someiv")).To(Equal(1))
+				EVP_CIPHER_CTX_cleanup(ctx)
 			})
 		})
 	})
