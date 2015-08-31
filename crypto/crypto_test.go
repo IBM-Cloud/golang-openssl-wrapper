@@ -19,4 +19,14 @@ var _ = Describe("Crypto", func() {
 			})
 		})
 	})
+
+	Describe("Managing a cipher context", func() {
+		Context("Initializing and freeing the context", func() {
+			It("should return indicating success", func() {
+				ctx := EVP_CIPHER_CTX_new()
+				EVP_CIPHER_CTX_init(ctx)
+				Expect(EVP_CIPHER_CTX_cleanup(ctx)).To(Equal(1))
+			})
+		})
+	})
 })

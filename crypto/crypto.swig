@@ -103,3 +103,33 @@ typedef struct evp_cipher_ctx_st {
 
 extern void OpenSSL_add_all_algorithms(void);
 extern void EVP_cleanup(void);
+
+/* Allocate and free up a cipher context */
+/*
+ * A note - I am only including EVP_CIPHER_CTX_new() because ctx := new(EVP_CIPHER_CTX) is
+ * causing a panic when I then pass ctx into EVP_CIPHER_CTX_init().  If someone can suggest
+ * how to fix this, we should really remove EVP_CIPHER_CTX_new(), since my understanding is
+ * that it is now deprecated from the OpenSSL API (it is not included in the manpages, either)
+ */
+extern EVP_CIPHER_CTX *EVP_CIPHER_CTX_new(void);
+extern void EVP_CIPHER_CTX_init(EVP_CIPHER_CTX *a);
+extern int EVP_CIPHER_CTX_cleanup(EVP_CIPHER_CTX *a);
+
+/*%apply unsigned char *OUTPUT {unsigned char *out};
+%apply int *OUTPUT {int *outl};
+%rename(wrapped_EVP_EncryptUpdate) EVP_EncryptUpdate(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl, unsigned char *in, int intl);
+extern int EVP_EncryptUpdate(EVP_CIPHER_CTX *ctx, unsigned char *out,
+         int *outl, unsigned char *in, int inl);
+%insert(go_wrapper) %{
+func EVP_EncryptUpdate(ctx EVP_CIPHER_CTX, plaintext string) (encrypted string, err error) {
+	buf_encrypt := make([]byte, len(plaintext) + ctx.GetCipher().GetBlock_size())
+	c_len := []int{0}
+	r := Wrapped_EVP_EncryptUpdate(ctx, buf_encrypt, c_len, plaintext, len(plaintext))
+	if (1 != r) {
+		err := errors.New("Encryption failed")
+		return "", err
+	}
+
+	return bytes.NewBuffer(buf_encrypt).String(), nil
+}
+%} */
