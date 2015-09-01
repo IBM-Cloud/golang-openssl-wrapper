@@ -107,6 +107,7 @@ typedef struct evp_cipher_ctx_st {
     unsigned char final[EVP_MAX_BLOCK_LENGTH]; /* possible final block */
 } EVP_CIPHER_CTX;
 
+// %malloc(EVP_CIPHER_CTX)
 /* Functions */
 
 extern void OpenSSL_add_all_algorithms(void);
@@ -132,12 +133,12 @@ extern int EVP_CIPHER_CTX_cleanup(EVP_CIPHER_CTX *a);
 extern int EVP_EncryptInit_ex(EVP_CIPHER_CTX *ctx, const EVP_CIPHER *type,
 	 ENGINE *impl, unsigned char *key, unsigned char *iv);
 
-/*%apply unsigned char *OUTPUT {unsigned char *out};
+%apply unsigned char *OUTPUT {unsigned char *out};
 %apply int *OUTPUT {int *outl};
-%rename(wrapped_EVP_EncryptUpdate) EVP_EncryptUpdate(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl, unsigned char *in, int intl);
+/* %rename(wrapped_EVP_EncryptUpdate) EVP_EncryptUpdate(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl, unsigned char *in, int intl); */
 extern int EVP_EncryptUpdate(EVP_CIPHER_CTX *ctx, unsigned char *out,
          int *outl, unsigned char *in, int inl);
-%insert(go_wrapper) %{
+/* %insert(go_wrapper) %{
 func EVP_EncryptUpdate(ctx EVP_CIPHER_CTX, plaintext string) (encrypted string, err error) {
 	buf_encrypt := make([]byte, len(plaintext) + ctx.GetCipher().GetBlock_size())
 	c_len := []int{0}
@@ -150,7 +151,14 @@ func EVP_EncryptUpdate(ctx EVP_CIPHER_CTX, plaintext string) (encrypted string, 
 	return bytes.NewBuffer(buf_encrypt).String(), nil
 }
 %} */
+extern int EVP_EncryptFinal_ex(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl);
 
-
+extern int EVP_DecryptInit_ex(EVP_CIPHER_CTX *ctx, const EVP_CIPHER *type,
+	 ENGINE *impl, unsigned char *key, unsigned char *iv);
+// %apply unsigned char *OUTPUT {unsigned char *in}
+/*%apply (char *STRING, int len) {(unsigned char *in, int inl)}
+extern int EVP_DecryptUpdate(EVP_CIPHER_CTX *ctx, unsigned char *out,
+         int *outl, unsigned char *in, int inl); */
 /* Ciphers */
 const EVP_CIPHER *EVP_aes_256_cbc(void);
+const EVP_CIPHER *EVP_des_cbc(void);
