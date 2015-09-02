@@ -42,13 +42,13 @@ var _ = Describe("Crypto", func() {
 				EVP_CIPHER_CTX_cleanup(ctx)
 			})
 
-/*			It("should allow the use of an approved algorithm in FIPS mode", func() {
+			It("should allow the use of an approved algorithm in FIPS mode", func() {
 				FIPS_mode_set(1)
 				ctx := EVP_CIPHER_CTX_new()
 				EVP_CIPHER_CTX_init(ctx)
-				Expect(EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), SwigcptrStruct_SS_engine_st(0), "thisisa256bitkeywhichhas32chars", "andwevea128bitiv")).To(Equal(1))
+				Expect(EVP_EncryptInit_ex(ctx, EVP_aes_256_cfb(), SwigcptrStruct_SS_engine_st(0), "thisisa256bitkeywhichhas32chars", "andwevea128bitiv")).To(Equal(1))
 				EVP_CIPHER_CTX_cleanup(ctx)
-			}) */
+			})
 		})
 	})
 

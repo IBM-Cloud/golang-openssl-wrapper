@@ -161,4 +161,5 @@ extern int EVP_DecryptUpdate(EVP_CIPHER_CTX *ctx, unsigned char *out,
          int *outl, unsigned char *in, int inl); */
 /* Ciphers */
 const EVP_CIPHER *EVP_aes_256_cbc(void);
+const EVP_CIPHER *EVP_aes_256_cfb(void);
 const EVP_CIPHER *EVP_des_cbc(void);
