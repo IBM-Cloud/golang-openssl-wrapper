@@ -84,7 +84,7 @@ var _ = Describe("Crypto", func() {
 		Context("Decrypting a string", func() {
 			ctx := EVP_CIPHER_CTX_new()
 			EVP_CIPHER_CTX_init(ctx)
-			EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), SwigcptrStruct_SS_engine_st(0), "somekey", "someiv")
+			EVP_EncryptInit_ex(ctx, EVP_aes_256_cfb(), SwigcptrStruct_SS_engine_st(0), "somekey", "someiv")
 
 			var b bytes.Buffer
 			plaintext := "My Fair Lady"
@@ -105,7 +105,7 @@ var _ = Describe("Crypto", func() {
 			EVP_CIPHER_CTX_init(dtx)
 
 			It("should initialize successfully", func() {
-				Expect(EVP_DecryptInit_ex(dtx, EVP_aes_256_cbc(), SwigcptrStruct_SS_engine_st(0), "somekey", "someiv")).To(Equal(1))
+				Expect(EVP_DecryptInit_ex(dtx, EVP_aes_256_cfb(), SwigcptrStruct_SS_engine_st(0), "somekey", "someiv")).To(Equal(1))
 			})
 
 /*			encrypted := b.String()
@@ -117,6 +117,48 @@ var _ = Describe("Crypto", func() {
 			}) */
 
 			EVP_CIPHER_CTX_cleanup(dtx)
+		})
+	})
+
+/*	Describe("Key Management", func() {
+		Context("Using PEM", func() {
+
+		})
+
+	}) */
+
+	Describe("Basic I/O", func() {
+		Context("Making a connection", func() {
+			It("Connects successfully", func() {
+				dest := "www.google.com:http"
+				bio := BIO_new_connect(dest)
+				Expect(bio).NotTo(BeNil())
+				Expect(BIO_do_connect(bio)).To(BeEquivalentTo(1))
+				Expect(BIO_free(bio)).To(Equal(1))
+			})
+		})
+
+		Context("File I/O", func() {
+			mode := "w+"
+			filename := "biotest.out"
+			text := "To Kill A Mockingbird"
+
+			fbio := BIO_new_file(filename, mode)
+
+			It("Writes to the file", func() {
+				Expect(fbio).NotTo(BeNil())
+				Expect(BIO_puts(fbio, text)).To(BeNumerically(">=", 1))
+			})
+
+			It("Reads from the file", func() {
+				var b bytes.Buffer	
+				rbuf := make([]byte, len(text) + 1)
+				/* For file BIOs, BIO_seek() returns 0 on success */
+				Expect(BIO_seek(fbio, 0)).To(BeEquivalentTo(0))
+				Expect(BIO_gets(fbio, rbuf, len(text) + 1)).To(BeNumerically(">=", 1))
+				b.Write(rbuf)
+				Expect(b.String()).To(Equal(text))
+			})
 		})
 	})
 })
