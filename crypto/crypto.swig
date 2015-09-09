@@ -112,8 +112,9 @@ extern int BIO_free(BIO *a);
 extern BIO *BIO_new_file(const char *filename, const char *mode);
 extern int BIO_puts(BIO *bp, const char *buf);
 %apply unsigned char *OUTPUT {char *buf}
-extern int BIO_gets(BIO *bp, char *buf, int size);
+// extern int BIO_gets(BIO *bp, char *buf, int size);
 extern long BIO_seek(BIO *bp, int ofs);
+extern long BIO_flush(BIO *bp);
 
 /* Connect */
 extern BIO *BIO_new_connect(char *name);
