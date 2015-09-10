@@ -19,20 +19,17 @@ var _ = Describe("Ssl", func() {
 			SSL_CTX_set_verify_depth(ctx, 4)
 			flags := SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3 | SSL_OP_NO_COMPRESSION
             SSL_CTX_set_options(ctx, flags)
-            res := SSL_CTX_load_verify_locations(ctx, "random-org-chain.pem", nil)
-            Expect(res).To(Equal(1)) 
+            loc := SSL_CTX_load_verify_locations(ctx, "random-org-chain.pem", "")
+            Expect(loc).To(Equal(1)) 
             web := BIO_new_ssl_connect(ctx)
             Expect(web).NotTo(BeNil())
-            res := BIO_set_conn_hostname(web, "random-org-chain.pem", 443)
-            Expect(res).To(Equal(1))
-            BIO_get_ssl(web, &ssl)
+            host := BIO_set_conn_hostname(web, "random-org-chain.pem")
+            Expect(host).To(Equal(1))
+            //port := BIO_set_conn_port(web, 443)
+            //BIO_get_ssl(web, &ssl)
             const PREFERRED_CIPHERS = "HIGH:!aNULL:!kRSA:!PSK:!SRP:!MDS:!RC4"
-            res := SSL_set_cipher_list(ssl, PREFERRED_CIPHERS)
-            Expect(res).To(Equal(1))
-            res := SSL_set_t1sext_host_name(ssl, Host_Name)
-            Expect(res).To(Equal(1))
-
-
+            cipher := SSL_set_cipher_list(ssl, PREFERRED_CIPHERS)
+            Expect(cipher).To(Equal(1))
 
 			})
 		})
