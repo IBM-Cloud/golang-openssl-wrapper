@@ -23,7 +23,7 @@ var _ = Describe("Ssl", func() {
             Expect(res).To(Equal(1)) 
             web := BIO_new_ssl_connect(ctx)
             Expect(web).NotTo(BeNil())
-            res := BIO_set_conn_hostname(web, random-org-chain.pem":" 443)
+            res := BIO_set_conn_hostname(web, "random-org-chain.pem", 443)
             Expect(res).To(Equal(1))
             BIO_get_ssl(web, &ssl)
             const PREFERRED_CIPHERS = "HIGH:!aNULL:!kRSA:!PSK:!SRP:!MDS:!RC4"
