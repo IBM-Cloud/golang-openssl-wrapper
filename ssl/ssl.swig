@@ -50,6 +50,7 @@ int SSL_set_cipher_list(SSL *s, const char *str);
 
 BIO_METHOD *BIO_s_connect(void);
 BIO *BIO_new_connect(const char *host_port);
+#define BIO_get_ssl(b,sslp)     BIO_ctrl(b,BIO_C_GET_SSL,0,(char *)sslp)
 #define BIO_set_conn_hostname(b,name) BIO_ctrl(b,BIO_C_SET_CONNECT,0,(char *)name)
 #define BIO_set_conn_port(b,port) BIO_ctrl(b,BIO_C_SET_CONNECT,1,(char *)port)
 #define BIO_set_conn_ip(b,ip)     BIO_ctrl(b,BIO_C_SET_CONNECT,2,(char *)ip)
