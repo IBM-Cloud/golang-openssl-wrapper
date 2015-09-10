@@ -19,7 +19,7 @@
 
 /* We may not need this, but we'll keep it here just in case */
 %import "openssl/ossl_typ.h"
-%include <typemaps.i>
+%include "typemaps.i"
 
 /*
  * From openssl/bio.h
@@ -111,8 +111,20 @@ extern int BIO_free(BIO *a);
 /* File */
 extern BIO *BIO_new_file(const char *filename, const char *mode);
 extern int BIO_puts(BIO *bp, const char *buf);
-%apply unsigned char *OUTPUT {char *buf}
-// extern int BIO_gets(BIO *bp, char *buf, int size);
+//%apply unsigned char *OUTPUT {char *buf}
+%typemap(gotype) char *outbuf %{[]byte%}
+%typemap(in) char *outbuf {
+	char tbuf[sizeof($input)];
+	$1 = (char *)&tbuf;
+}
+
+%typemap(argout) char *outbuf {
+//	printf("We have: %s\n", $1);
+	memcpy($input.array, $1, $input.cap);
+	$input.len = strlen($1);
+}
+//extern int BIO_gets(BIO *bp, char *buf, int size);
+extern int BIO_gets(BIO *bp, char *outbuf, int size);
 extern long BIO_seek(BIO *bp, int ofs);
 extern long BIO_flush(BIO *bp);
 

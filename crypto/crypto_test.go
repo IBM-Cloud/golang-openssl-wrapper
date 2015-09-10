@@ -6,6 +6,8 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"bytes"
+	"io/ioutil"
+//	"unsafe"
 )
 
 var _ = Describe("Crypto", func() {
@@ -151,17 +153,24 @@ var _ = Describe("Crypto", func() {
 				Expect(BIO_flush(fbio)).To(BeEquivalentTo(1))
 				/* For file BIOs, BIO_seek() returns 0 on success */
 				Expect(BIO_seek(fbio, 0)).To(BeEquivalentTo(0))
+				/* Temp block to check with native go I/O */
+				BIO_seek(fbio, 0)
+				fbuf, _ := ioutil.ReadFile(filename)
+				s := string(fbuf[:])
+				Expect(s).To(Equal(text))
 			})
 
-/*			It("Reads from the file", func() {
-				rbuf := make([]byte, len(text) + 1)
-				Expect(len(text)).To(Equal(21))
-				Expect(len(rbuf)).To(Equal(22))
+			It("Reads from the file", func() {
+				rbuf := make([]byte, len(text))
 				l := BIO_gets(fbio, rbuf, len(text) +1)
+				/* Check that we've read enough bytes */
 				Expect(l).To(BeNumerically(">=", len(text)))
-				s := string(rbuf[:l])
+
+				/* Check that the contents are what we wrote */
+				s := string(rbuf[:])
+				Expect(len(s)).To(Equal(len(text)))
 				Expect(s).To(Equal(text))
-			}) */
+			})
 		})
 	})
 })
