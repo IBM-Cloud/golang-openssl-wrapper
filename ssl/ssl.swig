@@ -21,8 +21,19 @@ SSL_CTX *SSL_CTX_new(const SSL_METHOD *method);
 void SSL_CTX_set_verify(SSL_CTX *ctx, int mode,
                         int (*callback) (int, X509_STORE_CTX *));
 void SSL_CTX_set_verify_depth(SSL_CTX *ctx, int depth);
-# define SSL_CTX_set_options(ctx,op) \
+#define SSL_CTX_set_options(ctx,op) \
         SSL_CTX_ctrl((ctx),SSL_CTRL_OPTIONS,(op),NULL)
+#define SSL_CTX_clear_options(ctx,op) \
+        SSL_CTX_ctrl((ctx),SSL_CTRL_CLEAR_OPTIONS,(op),NULL)
+#define SSL_CTX_get_options(ctx) \
+        SSL_CTX_ctrl((ctx),SSL_CTRL_OPTIONS,0,NULL)
+#define SSL_set_options(ssl,op) \
+        SSL_ctrl((ssl),SSL_CTRL_OPTIONS,(op),NULL)
+#define SSL_clear_options(ssl,op) \
+        SSL_ctrl((ssl),SSL_CTRL_CLEAR_OPTIONS,(op),NULL)
+#define SSL_get_options(ssl) \
+        SSL_ctrl((ssl),SSL_CTRL_OPTIONS,0,NULL)
+
 #define SSL_OP_NO_SSLv2                                 0x01000000L
 #define SSL_OP_NO_SSLv3                                 0x02000000L
 #define SSL_OP_NO_COMPRESSION                           0x00020000L
