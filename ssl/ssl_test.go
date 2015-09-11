@@ -11,7 +11,7 @@ var _ = Describe("ssl", func() {
 	Context("initializing TLS", func() {
 
 		It("initialzes succesfully", func() {
-			var ssl *SSL
+			//var ssl *SSL
 			Expect(SSL_library_init()).To(Equal(1))
 			ctx := SSL_CTX_new(SSLv3_client_method())
 			Expect(ctx).NotTo(BeNil())
