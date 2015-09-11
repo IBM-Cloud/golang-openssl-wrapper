@@ -101,7 +101,24 @@
 #define BIO_C_GET_EX_ARG                        154
 
 /* Types */
-typedef struct bio_st BIO;
+typedef struct bio_st {
+    BIO_METHOD *method;
+    /* bio, mode, argp, argi, argl, ret */
+    long (*callback) (struct bio_st *, int, const char *, int, long, long);
+    char *cb_arg;               /* first argument for the callback */
+    int init;
+    int shutdown;
+    int flags;                  /* extra storage */
+    int retry_reason;
+    int num;
+    void *ptr;
+    struct bio_st *next_bio;    /* used by filter BIOs */
+    struct bio_st *prev_bio;    /* used by filter BIOs */
+    int references;
+    unsigned long num_read;
+    unsigned long num_write;
+    CRYPTO_EX_DATA ex_data;
+} BIO;
 typedef struct bio_method_st BIO_METHOD;
 
 /* Functions and macros */
