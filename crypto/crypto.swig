@@ -21,16 +21,20 @@
 %import "openssl/ossl_typ.h"
 %include "typemaps.i"
 
+
 %typemap(gotype) char *outbuf %{[]byte%}
 %typemap(in) char *outbuf {
-	char tbuf[sizeof($input)];
-	$1 = (char *)&tbuf;
+    char tbuf[sizeof($input.array)*sizeof(char*)];
+    $1 = (char *)&tbuf;
 }
 
 %typemap(argout) char *outbuf {
-	memcpy($input.array, $1, $input.cap);
-	$input.len = strlen($1);
+//	printf("We have: %s\n", $1);
+    size_t len;
+    memcpy($input.array, $1, $input.cap);
+    $input.len = (intgo)strlen($1);
 }
+
 
 /*
  * From openssl/conf.h
@@ -145,32 +149,26 @@ extern int EVP_CIPHER_CTX_cleanup(EVP_CIPHER_CTX *a);
 extern int EVP_EncryptInit_ex(EVP_CIPHER_CTX *ctx, const EVP_CIPHER *type,
 	 ENGINE *impl, unsigned char *key, unsigned char *iv);
 
-%apply unsigned char *OUTPUT {unsigned char *out};
-%apply int *OUTPUT {int *outl};
-/* %rename(wrapped_EVP_EncryptUpdate) EVP_EncryptUpdate(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl, unsigned char *in, int intl); */
+
+
+%apply char *outbuf {unsigned char *out}
+// %apply int *OUTPUT {int *outl};
+%typemap(gotype) int *outl %{*int%}
+
 extern int EVP_EncryptUpdate(EVP_CIPHER_CTX *ctx, unsigned char *out,
          int *outl, unsigned char *in, int inl);
-/* %insert(go_wrapper) %{
-func EVP_EncryptUpdate(ctx EVP_CIPHER_CTX, plaintext string) (encrypted string, err error) {
-	buf_encrypt := make([]byte, len(plaintext) + ctx.GetCipher().GetBlock_size())
-	c_len := []int{0}
-	r := Wrapped_EVP_EncryptUpdate(ctx, buf_encrypt, c_len, plaintext, len(plaintext))
-	if (1 != r) {
-		err := errors.New("Encryption failed")
-		return "", err
-	}
 
-	return bytes.NewBuffer(buf_encrypt).String(), nil
-}
-%} */
 extern int EVP_EncryptFinal_ex(EVP_CIPHER_CTX *ctx, unsigned char *out, int *outl);
 
 extern int EVP_DecryptInit_ex(EVP_CIPHER_CTX *ctx, const EVP_CIPHER *type,
 	 ENGINE *impl, unsigned char *key, unsigned char *iv);
-// %apply unsigned char *OUTPUT {unsigned char *in}
-/*%apply (char *STRING, int len) {(unsigned char *in, int inl)}
+
 extern int EVP_DecryptUpdate(EVP_CIPHER_CTX *ctx, unsigned char *out,
-         int *outl, unsigned char *in, int inl); */
+        int *outl, unsigned char *in, int inl); 
+
+extern  int EVP_DecryptFinal_ex(EVP_CIPHER_CTX *ctx, unsigned char *out,
+        int *outl);
+
 /* Ciphers */
 const EVP_CIPHER *EVP_aes_256_cbc(void);
 const EVP_CIPHER *EVP_aes_256_cfb(void);
