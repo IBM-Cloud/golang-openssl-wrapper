@@ -6,39 +6,59 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/ScarletTanager/openssl/crypto"
+	"github.com/ScarletTanager/openssl/bio"
 )
 
 var _ = Describe("ssl", func() {
 	Context("Using TLS for connections", func() {
 		var ctx SSL_CTX
-		// var sslinst SSL
-		var host string
+		var ssl SSL
+		var host, hostport string
 
 		BeforeEach(func() {
 			SSL_load_error_strings()
 			Expect(SSL_library_init()).To(Equal(1))
 			crypto.OPENSSL_config("")
-			host = "www.random.org:443"
+			host = "www.random.org"
+			hostport = "www.random.org:443"
 		})
 
 		AfterEach(func() {
+			SSL_free(ssl)
 			SSL_CTX_free(ctx)
 		})
 
 		Context("Making a client connection", func() {
 			It("initializes the context", func() {
-				//var ssl *SSL
+				type foo struct {
+					name string
+					age int
+				}
 				ctx = SSL_CTX_new(SSLv23_method())
 				Expect(ctx).NotTo(BeNil())
 				SSL_CTX_set_verify(ctx, SSL_VERIFY_NONE, nil)
 				SSL_CTX_set_verify_depth(ctx, 4)
-	            conn := BIO_new_ssl_connect(ctx)
+
+				/* Initialize the SSL and connect BIOs */
+	            conn := bio.BIO_new_ssl_connect(ctx)
 	            Expect(conn).NotTo(BeNil())
 //	            Expect(SSL_CTX_load_verify_locations(ctx, "random-org-chain.pem", "")).To(Equal(1))
-	            Expect(BIO_set_conn_hostname(conn, host)).To(BeEquivalentTo(1))
-				Expect(BIO_get_conn_hostname(conn)).To(Equal(host))
-				// sslinst = SSL{}
-				// Expect(BIO_get_ssl(conn, sslinst)).To(BeEquivalentTo(1))
+	            Expect(bio.BIO_set_conn_hostname(conn, hostport)).To(BeEquivalentTo(1))
+				Expect(bio.BIO_get_conn_hostname(conn)).To(Equal(hostport))
+
+				/* Setup SSL */
+				ssl = SSL_new(ctx)
+				Expect(ssl).NotTo(BeNil())
+				Expect(bio.BIO_get_ssl(conn, ssl)).To(BeEquivalentTo(1))
+				ciphers := "HIGH:!aNULL:!kRSA:!PSK:!SRP:!MD5:!RC4"
+				Expect(SSL_set_cipher_list(ssl, ciphers)).To(Equal(1))
+				Expect(SSL_set_tlsext_host_name(ssl, host)).To(BeEquivalentTo(1))
+				// Expect(SSL_connect(ssl)).To(Equal(1))
+				// Expect(SSL_get_error(ssl, SSL_connect(ssl))).To(Equal(4000))
+
+				/* Make the connection */
+				Expect(bio.BIO_do_connect(conn)).To(BeEquivalentTo(1))
+				// Expect(crypto.BIO_do_handshake(conn.(crypto.BIO))).To(BeEquivalentTo(1))
 	        })
 				/*flags := SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3 | SSL_OP_NO_COMPRESSION
 	            SSL_CTX_set_options(ctx, flags)

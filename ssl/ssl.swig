@@ -6,6 +6,8 @@
 #include <openssl/ssl.h>
 #include <openssl/ossl_typ.h>
 #include <openssl/bio.h>
+#include <openssl/tls1.h>
+// #include <openssl/pem.h>
 %}
 
 /*
@@ -15,9 +17,17 @@
 #define OPENSSL_NO_KRB5
 
 %import "openssl/lhash.h"
+%import "openssl/safestack.h"
 %import "openssl/stack.h"
 #define STACK_OF(type) struct stack_st_##type
 #define LHASH_OF(type) struct lhash_st_##type
+#define DECLARE_STACK_OF(type) \
+STACK_OF(type) \
+    { \
+    _STACK stack; \
+    };
+%import "openssl/pem.h"
+// %import "openssl/ssl.h"
 
 typedef struct ssl_ctx_st {
     const SSL_METHOD *method;
@@ -607,35 +617,11 @@ long SSL_CTX_ctrl(SSL_CTX *ctx, int cmd, long larg, void *parg);
 // int SSL_CTX_load_verify_locations(SSL_CTX *ctx, const char *CAfile,
 //                                    const char *CApath);
 
-BIO *BIO_new_ssl_connect(SSL_CTX *ctx);
+SSL *SSL_new(SSL_CTX *ctx);
+void SSL_free(SSL *ssl);
+int SSL_set_cipher_list(SSL *ssl, const char *str);
+long SSL_set_tlsext_host_name(SSL *ssl, char *name);
+int SSL_connect(SSL *ssl);
+int SSL_get_error(SSL *ssl, int ret);
 
-/*
- * From openssl/bio.h
- */
 
-// More BIO_ctrl() macros...
-extern long BIO_set_conn_hostname(BIO *bp, char *name);
-extern char *BIO_get_conn_hostname(BIO *bp);
-extern long BIO_get_ssl(BIO *bp, SSL *sp);
-
-// BIO_METHOD *BIO_f_ssl(void);
-// BIO *BIO_new_ssl(SSL_CTX *ctx, int client);
-// BIO *BIO_new_buffer_ssl_connect(SSL_CTX *ctx);
-// int BIO_ssl_copy_session_id(BIO *to, BIO *from);
-// void BIO_ssl_shutdown(BIO *ssl_bio);
-// int SSL_CTX_set_cipher_list(SSL_CTX *, const char *str);
-// int SSL_set_cipher_list(SSL *s, const char *str);
-
-// BIO_METHOD *BIO_s_connect(void);
-// BIO *BIO_new_connect(const char *host_port);
-// #define BIO_get_ssl(b,sslp)     BIO_ctrl(b,BIO_C_GET_SSL,0,(char *)sslp)
-// long BIO_ctrl(BIO *bp, int cmd, long larg, void *parg);
-// #define BIO_set_conn_hostname(b,name) BIO_ctrl(b,BIO_C_SET_CONNECT,0,(char *)name)
-// #define BIO_set_conn_port(b,port) BIO_ctrl(b,BIO_C_SET_CONNECT,1,(char *)port)
-// #define BIO_set_conn_ip(b,ip)     BIO_ctrl(b,BIO_C_SET_CONNECT,2,(char *)ip)
-// #define BIO_set_conn_int_port(b,port) BIO_ctrl(b,BIO_C_SET_CONNECT,3,(char *)port)
-// #define BIO_get_conn_hostname(b)  BIO_ptr_ctrl(b,BIO_C_GET_CONNECT,0)
-// #define BIO_get_conn_port(b)      BIO_ptr_ctrl(b,BIO_C_GET_CONNECT,1)
-// #define BIO_get_conn_ip(b)               BIO_ptr_ctrl(b,BIO_C_GET_CONNECT,2)
-// #define BIO_get_conn_int_port(b) BIO_int_ctrl(b,BIO_C_GET_CONNECT,3,0)
-// #define BIO_set_nbio(b,n)       BIO_ctrl(b,BIO_C_SET_NBIO,(n),NULL)
