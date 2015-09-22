@@ -106,13 +106,23 @@ typedef struct bio_method_st BIO_METHOD;
 
 /* Functions and macros */
 
+BIO_METHOD *   BIO_s_mem(void);
+BIO_METHOD *   BIO_s_file(void);
+
 extern int BIO_free(BIO *a);
-// extern BIO *BIO_new(BIO_METHOD *method);
+extern BIO *BIO_new(BIO_METHOD *method);
 // extern int BIO_make_bio_pair(BIO *bp1, BIO *bp2);
 
 /* File */
 extern BIO *BIO_new_file(const char *filename, const char *mode);
 extern int BIO_puts(BIO *bp, const char *buf);
+
+int BIO_read_filename(BIO *b, char *name);
+int BIO_write_filename(BIO *b, char *name);
+int BIO_append_filename(BIO *b, char *name);
+int BIO_rw_filename(BIO *b, char *name);
+
+int BIO_printf(BIO *bio, const char *format, ...);
 
 %typemap(gotype) char *outbuf %{[]byte%}
 %typemap(in) char *outbuf {
