@@ -126,7 +126,7 @@ int BIO_printf(BIO *bio, const char *format, ...);
 
 %typemap(gotype) char *outbuf %{[]byte%}
 %typemap(in) char *outbuf {
-	char tbuf[sizeof($input)];
+	char tbuf[sizeof($input.array)*sizeof(char*)];
 	$1 = (char *)&tbuf;
 }
 
@@ -141,7 +141,7 @@ extern long BIO_flush(BIO *bp);
 
 %typemap(gotype) void *buf %{[]byte%}
 %typemap(in) void *buf {
-    char tbuf[sizeof($input)];
+    char tbuf[sizeof($input.array)*sizeof(char*)];
     $1 = (void*)&tbuf;
 }
 %typemap(argout) void *buf {

@@ -12,7 +12,7 @@ var _ = Describe("Bio", func() {
 	Describe("Basic I/O", func() {
 		var (
 			b    BIO
-			text = "Some test data"
+			text = "Some really really really really really really long test data"
 		)
 
 		Context("Using a memory store", func() {
