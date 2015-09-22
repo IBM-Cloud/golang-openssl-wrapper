@@ -139,6 +139,18 @@ extern int BIO_gets(BIO *bp, char *outbuf, int size);
 extern long BIO_seek(BIO *bp, int ofs);
 extern long BIO_flush(BIO *bp);
 
+%typemap(gotype) void *buf %{[]byte%}
+%typemap(in) void *buf {
+    char tbuf[sizeof($input)];
+    $1 = (void*)&tbuf;
+}
+%typemap(argout) void *buf {
+    memcpy($input.array, $1, $input.cap);
+    $input.len = strlen($1);
+}
+
+int BIO_read(BIO *b, void *buf, int len);
+
 /* Connect */
 // BIO_METHOD *BIO_s_connect(void);
 extern BIO *BIO_new_connect(char *name);
