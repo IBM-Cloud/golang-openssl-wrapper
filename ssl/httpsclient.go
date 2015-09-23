@@ -61,16 +61,28 @@ func (h HttpsConn) RemoteAddr() net.Addr {
 }
 
 func (h HttpsConn) SetDeadLine(t time.Time) error {
+	now := time.Now()
+	if t.Equal(now) || t.Before(now) {
+		return errors.New("Invalid deadline")
+	}
 
 	return nil
 }
 
 func (h HttpsConn) SetReadDeadLine(t time.Time) error {
+	now := time.Now()
+	if t.Equal(now) || t.Before(now) {
+		return errors.New("Invalid deadline")
+	}
 
 	return nil
 }
 
 func (h HttpsConn) SetWriteDeadLine(t time.Time) error {
+	now := time.Now()
+	if t.Equal(now) || t.Before(now) {
+		return errors.New("Invalid deadline")
+	}
 
 	return nil
 }
@@ -137,7 +149,7 @@ func ctxInit(config string) (SSL_CTX, error) {
 	}
 	crypto.OPENSSL_config(config)
 
-	ctx := SSL_CTX_new(SSLv23_method())
+	ctx := SSL_CTX_new(SSLv23_client_method())
 	if ctx == nil {
 		return nil, errors.New("Unable to initialize SSL context")
 	}
@@ -153,6 +165,10 @@ func sslInit(ctx SSL_CTX, hostname string) (bio.BIO, error) {
 	conn := bio.BIO_new_ssl_connect(ctx)
 	if conn == nil {
 		return nil, errors.New("Unable to setup I/O")
+	}
+
+	if bio.BIO_set_conn_hostname(conn, hostname) != 1 {
+		return nil, errors.New("Unable to set hostname in BIO object")
 	}
 
 	/* Setup SSL */

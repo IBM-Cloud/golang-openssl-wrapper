@@ -28,7 +28,7 @@ var _ = Describe("Httpsclient", func() {
 
 	Context("Performing socket I/O", func() {
 		BeforeEach(func() {
-			conn, err := t.Dial("tcp", "somevalidsite")
+			conn, err := t.Dial("tcp", "www.random.org:443")
 			Expect(err).NotTo(HaveOccurred())
 			h = conn.(HttpsConn)
 		})
