@@ -614,8 +614,8 @@ long SSL_CTX_ctrl(SSL_CTX *ctx, int cmd, long larg, void *parg);
 // #define SSL_OP_NO_SSLv3                                 0x02000000L
 // #define SSL_OP_NO_COMPRESSION                           0x00020000L
 
-// int SSL_CTX_load_verify_locations(SSL_CTX *ctx, const char *CAfile,
-//                                    const char *CApath);
+int SSL_CTX_load_verify_locations(SSL_CTX *ctx, const char *CAfile,
+                                    const char *CApath);
 
 SSL *SSL_new(SSL_CTX *ctx);
 void SSL_free(SSL *ssl);

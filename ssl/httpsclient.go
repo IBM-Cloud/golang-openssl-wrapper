@@ -167,6 +167,9 @@ func sslInit(ctx SSL_CTX, hostname string) (bio.BIO, error) {
 		return nil, errors.New("Unable to setup I/O")
 	}
 
+	if SSL_CTX_load_verify_locations(ctx, "", "/etc/ssl/certs") != 1 {
+		return nil, errors.New("Unable to load certificates for verification")
+	}
 	if bio.BIO_set_conn_hostname(conn, hostname) != 1 {
 		return nil, errors.New("Unable to set hostname in BIO object")
 	}
