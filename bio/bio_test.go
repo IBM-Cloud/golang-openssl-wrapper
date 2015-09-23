@@ -56,6 +56,15 @@ var _ = Describe("Bio", func() {
 				Expect(BIO_free(b)).To(Equal(1))
 			})
 
+			It("Should be writable with BIO_write", func() {
+				b = BIO_new(BIO_s_file())
+				Expect(BIO_write_filename(b, "biotest.out")).To(Equal(1))
+				Expect(BIO_seek(b, 0)).To(BeEquivalentTo(0))
+				// Expect(BIO_printf(b, text)).To(Equal(len(text)))
+				Expect(BIO_write(b, text, len(text))).To(Equal(len(text)))
+				Expect(BIO_free(b)).To(Equal(1))
+			})
+
 			It("Should be readable with BIO_gets", func() {
 				buf := make([]byte, len(text))
 				b = BIO_new(BIO_s_file())

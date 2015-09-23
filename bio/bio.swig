@@ -151,6 +151,19 @@ extern long BIO_flush(BIO *bp);
 
 int BIO_read(BIO *b, void *buf, int len);
 
+%typemap(gotype) const void *buf %{string%}
+%typemap(in) const void *buf {
+    char tbuf[sizeof($input.p)*sizeof(char*)];
+    $1 = (const void*)&tbuf;
+    memcpy($1, $input.p, $input.n);
+}
+%typemap(argout) const void *buf {
+    $input.p = $1;
+    $input.n = strlen($1);
+}
+
+int BIO_write(BIO *b, const void *buf, int len);
+
 /* Connect */
 // BIO_METHOD *BIO_s_connect(void);
 extern BIO *BIO_new_connect(char *name);
