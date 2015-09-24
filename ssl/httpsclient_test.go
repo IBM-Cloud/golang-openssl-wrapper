@@ -3,9 +3,12 @@ package ssl_test
 import (
 	. "github.com/ScarletTanager/openssl/ssl"
 
+	"fmt"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"net/http"
+	"net/http/httptest"
+	"net/url"
 	"time"
 )
 
@@ -13,9 +16,26 @@ var _ = Describe("Httpsclient", func() {
 
 	var t http.Transport
 	var h HttpsConn
+	var server *httptest.Server
+
 	BeforeEach(func() {
-		t = NewHttpsTransport()
+		/*
+		 * Setup our mock HTTPS server
+		 */
+		server = httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			fmt.Fprintln(w, "TESTING")
+		}))
+		Expect(server).NotTo(BeNil())
+
+		t = NewHttpsTransport(func(req *http.Request) (*url.URL, error) {
+			return url.Parse(server.URL)
+		})
 		Expect(t).NotTo(BeNil())
+
+	})
+
+	AfterEach(func() {
+		server.Close()
 	})
 
 	Context("Establishing a connection", func() {
@@ -28,7 +48,7 @@ var _ = Describe("Httpsclient", func() {
 
 	Context("Performing socket I/O", func() {
 		BeforeEach(func() {
-			conn, err := t.Dial("tcp", "www.random.org:443")
+			conn, err := t.Dial("tcp", "www.hillbilly.de:777")
 			Expect(err).NotTo(HaveOccurred())
 			h = conn.(HttpsConn)
 		})

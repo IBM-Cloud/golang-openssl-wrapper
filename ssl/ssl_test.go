@@ -9,7 +9,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = FDescribe("ssl", func() {
+var _ = Describe("ssl", func() {
 	Context("Using TLS for connections", func() {
 		var ctx SSL_CTX
 		var ssl SSL
@@ -56,7 +56,7 @@ var _ = FDescribe("ssl", func() {
 				Expect(SSL_set_tlsext_host_name(ssl, host)).To(BeEquivalentTo(1))
 			})
 
-			PIt("Connects successfully", func() {
+			It("Connects successfully", func() {
 				/* Make the connection */
 				Expect(bio.BIO_do_connect(conn)).To(BeEquivalentTo(1))
 				// Expect(crypto.BIO_do_handshake(conn.(crypto.BIO))).To(BeEquivalentTo(1))

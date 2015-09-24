@@ -11,6 +11,7 @@ import (
 	"github.com/ScarletTanager/openssl/crypto"
 	"net"
 	"net/http"
+	"net/url"
 	"time"
 )
 
@@ -134,10 +135,11 @@ func dialTLS(network, addr string) (net.Conn, error) {
 
 }
 
-func NewHttpsTransport() http.Transport {
+func NewHttpsTransport(proxyFunc func(*http.Request) (*url.URL, error)) http.Transport {
 	h := http.Transport{
 		Dial:    dialTLS,
 		DialTLS: dialTLS,
+		Proxy:   proxyFunc,
 	}
 	return h
 }
