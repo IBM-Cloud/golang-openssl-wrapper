@@ -9,8 +9,6 @@
  * From openssl/bio.h
  */
 
-/* Types */
-
 typedef struct bio_st {
     BIO_METHOD *method;
     /* bio, mode, argp, argi, argl, ret */
@@ -31,8 +29,6 @@ typedef struct bio_st {
 } BIO;
 
 typedef struct bio_method_st BIO_METHOD;
-
-/* Constants */
 
 /* connect BIO stuff */
 #define BIO_CONN_S_BEFORE               1
@@ -104,8 +100,7 @@ typedef struct bio_method_st BIO_METHOD;
 #define BIO_C_SET_EX_ARG                        153
 #define BIO_C_GET_EX_ARG                        154
 
-/* Functions and macros */
-
+/* General BIO */
 BIO_METHOD *   BIO_s_mem(void);
 BIO_METHOD *   BIO_s_file(void);
 
@@ -123,22 +118,25 @@ int BIO_write_filename(BIO *b, char *name);
 int BIO_append_filename(BIO *b, char *name);
 int BIO_rw_filename(BIO *b, char *name);
 
+BIO *BIO_new(BIO_METHOD *method);
+int BIO_free(BIO *a);
+// int BIO_make_bio_pair(BIO *bp1, BIO *bp2);
+int BIO_puts(BIO *bp, const char *buf);
 int BIO_printf(BIO *bio, const char *format, ...);
+long BIO_seek(BIO *bp, int ofs);
+long BIO_flush(BIO *bp);
 
 %typemap(gotype) char *outbuf %{[]byte%}
 %typemap(in) char *outbuf {
 	char tbuf[sizeof($input.array)*sizeof(char*)];
 	$1 = (char *)&tbuf;
 }
-
 %typemap(argout) char *outbuf {
 	memcpy($input.array, $1, $input.cap);
 	$input.len = strlen($1);
 }
 
-extern int BIO_gets(BIO *bp, char *outbuf, int size);
-extern long BIO_seek(BIO *bp, int ofs);
-extern long BIO_flush(BIO *bp);
+int BIO_gets(BIO *bp, char *outbuf, int size);
 
 %typemap(gotype) void *buf %{[]byte%}
 %typemap(in) void *buf {
@@ -165,6 +163,16 @@ int BIO_read(BIO *b, void *buf, int len);
 
 int BIO_write(BIO *b, const void *buf, int len);
 
+
+/* File storage */
+BIO_METHOD *   BIO_s_file(void);
+BIO *BIO_new_file(const char *filename, const char *mode);
+
+int BIO_read_filename(BIO *b, char *name);
+int BIO_write_filename(BIO *b, char *name);
+int BIO_append_filename(BIO *b, char *name);
+int BIO_rw_filename(BIO *b, char *name);
+
 /* Connect */
 // BIO_METHOD *BIO_s_connect(void);
 extern BIO *BIO_new_connect(char *name);
@@ -175,14 +183,12 @@ extern long BIO_do_handshake(BIO *bp);
  * From openssl/ssl.h
  */
 // More BIO_ctrl() macros...
-extern long BIO_set_conn_hostname(BIO *bp, char *name);
-extern char *BIO_get_conn_hostname(BIO *bp);
-extern long BIO_get_ssl(BIO *bp, SSL *sp);
-extern long BIO_set_ssl_mode(BIO *bp, int client);
-/* Functions */
+long BIO_get_ssl(BIO *bp, SSL *sp);
+long BIO_set_ssl_mode(BIO *bp, int client);
 
-BIO *BIO_new_ssl_connect(SSL_CTX *ctx);
 BIO_METHOD *BIO_f_ssl(void);
+BIO *BIO_new_ssl_connect(SSL_CTX *ctx);
+// long BIO_do_handshake(BIO *bp);
 // BIO_METHOD *BIO_f_ssl(void);
 // BIO *BIO_new_ssl(SSL_CTX *ctx, int client);
 // BIO *BIO_new_buffer_ssl_connect(SSL_CTX *ctx);
