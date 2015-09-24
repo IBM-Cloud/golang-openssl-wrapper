@@ -106,17 +106,27 @@ typedef struct bio_method_st BIO_METHOD;
 
 /* Functions and macros */
 
+BIO_METHOD *   BIO_s_mem(void);
+BIO_METHOD *   BIO_s_file(void);
+
 extern int BIO_free(BIO *a);
-// extern BIO *BIO_new(BIO_METHOD *method);
+extern BIO *BIO_new(BIO_METHOD *method);
 // extern int BIO_make_bio_pair(BIO *bp1, BIO *bp2);
 
 /* File */
 extern BIO *BIO_new_file(const char *filename, const char *mode);
 extern int BIO_puts(BIO *bp, const char *buf);
 
+int BIO_read_filename(BIO *b, char *name);
+int BIO_write_filename(BIO *b, char *name);
+int BIO_append_filename(BIO *b, char *name);
+int BIO_rw_filename(BIO *b, char *name);
+
+int BIO_printf(BIO *bio, const char *format, ...);
+
 %typemap(gotype) char *outbuf %{[]byte%}
 %typemap(in) char *outbuf {
-	char tbuf[sizeof($input)];
+	char tbuf[sizeof($input.array)*sizeof(char*)];
 	$1 = (char *)&tbuf;
 }
 
@@ -128,6 +138,31 @@ extern int BIO_puts(BIO *bp, const char *buf);
 extern int BIO_gets(BIO *bp, char *outbuf, int size);
 extern long BIO_seek(BIO *bp, int ofs);
 extern long BIO_flush(BIO *bp);
+
+%typemap(gotype) void *buf %{[]byte%}
+%typemap(in) void *buf {
+    char tbuf[sizeof($input.array)*sizeof(char*)];
+    $1 = (void*)&tbuf;
+}
+%typemap(argout) void *buf {
+    memcpy($input.array, $1, $input.cap);
+    $input.len = strlen($1);
+}
+
+int BIO_read(BIO *b, void *buf, int len);
+
+%typemap(gotype) const void *buf %{string%}
+%typemap(in) const void *buf {
+    char tbuf[sizeof($input.p)*sizeof(char*)];
+    $1 = (const void*)&tbuf;
+    memcpy($1, $input.p, $input.n);
+}
+%typemap(argout) const void *buf {
+    $input.p = $1;
+    $input.n = strlen($1);
+}
+
+int BIO_write(BIO *b, const void *buf, int len);
 
 /* Connect */
 // BIO_METHOD *BIO_s_connect(void);
