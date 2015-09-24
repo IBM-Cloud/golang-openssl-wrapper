@@ -140,7 +140,6 @@ int BIO_reset(BIO *b);
 
 int BIO_gets(BIO *bp, char *outbuf, int size);
 
-%typemap(gotype) void *buf %{[]byte%}
 %apply char *outbuf { void *buf }
 
 int BIO_read(BIO *b, void *buf, int len);
