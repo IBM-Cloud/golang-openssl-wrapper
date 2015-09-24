@@ -96,7 +96,7 @@ var _ = Describe("Bio", func() {
 					"User-Agent: https://github.com/ScarletTanager/openssl",
 					fmt.Sprintf("Host: %s", host),
 					"Accept: */*",
-				}, "\n")
+				}, "\n") + "\n\n"
 			)
 
 			It("Should create a new bio using a connection", func() {
@@ -136,10 +136,10 @@ var _ = Describe("Bio", func() {
 				Expect(BIO_write(b, request, len(request))).To(Equal(len(request)))
 			})
 
-			// It("Should successfully receive a response", func() {
-			// 	buf := make([]byte, 2048)
-			// 	Expect(BIO_read(b, buf, len(buf))).To(Equal(len(buf)))
-			// })
+			It("Should successfully receive a response", func() {
+				buf := make([]byte, 1024)
+				Expect(BIO_read(b, buf, len(buf))).To(BeNumerically(">", 0))
+			})
 
 			It("Should reset successfully", func() {
 				Expect(BIO_reset(b)).To(Equal(0))
