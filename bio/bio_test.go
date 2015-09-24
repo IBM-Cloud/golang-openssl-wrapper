@@ -3,16 +3,18 @@ package bio_test
 import (
 	. "github.com/ScarletTanager/openssl/bio"
 
+	"fmt"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"io/ioutil"
+	"strings"
 )
 
 var _ = Describe("Bio", func() {
 	Describe("Basic I/O", func() {
 		var (
 			b    BIO
-			text = "Some really really really really really really long test data"
+			text = "Some really really really really really really really really really really really long test data"
 		)
 
 		Context("Using a memory store", func() {
@@ -81,6 +83,72 @@ var _ = Describe("Bio", func() {
 				Expect(BIO_seek(b, 0)).To(BeEquivalentTo(0))
 				Expect(BIO_read(b, buf, len(text)+1)).To(Equal(len(text)))
 				Expect(string(buf)).To(Equal(text))
+				Expect(BIO_free(b)).To(Equal(1))
+			})
+		})
+
+		Context("Using a connection", func() {
+			var (
+				host    = "www.google.com"
+				port    = "http"
+				request = strings.Join([]string{
+					"HEAD / HTTP/1.1",
+					"User-Agent: https://github.com/ScarletTanager/openssl",
+					fmt.Sprintf("Host: %s", host),
+					"Accept: */*",
+				}, "\n")
+			)
+
+			It("Should create a new bio using a connection", func() {
+				b = BIO_new(BIO_s_connect())
+				Expect(b).NotTo(BeNil())
+			})
+
+			It("Should set the hostname of the connection", func() {
+				Expect(BIO_set_conn_hostname(b, host)).To(BeEquivalentTo(1))
+			})
+
+			It("Should return the correct host", func() {
+				Expect(BIO_get_conn_hostname(b)).To(Equal(host))
+			})
+
+			It("Should set the port of the connection", func() {
+				Expect(BIO_set_conn_port(b, port)).To(BeEquivalentTo(1))
+			})
+
+			It("Should return the correct port", func() {
+				Expect(BIO_get_conn_port(b)).To(Equal(port))
+			})
+
+			It("Should connect successfully", func() {
+				Expect(BIO_do_connect(b)).To(BeEquivalentTo(1))
+			})
+
+			// It("Should reset successfully", func() {
+			// 	Expect(BIO_reset(b)).To(Equal(1))
+			// })
+
+			// It("Should connect successfully after resetting", func() {
+			// 	Expect(BIO_do_connect(b)).To(BeEquivalentTo(1))
+			// })
+
+			It("Should execute the request successfully", func() {
+				Expect(BIO_write(b, request, len(request))).To(Equal(len(request)))
+			})
+
+			// It("Should successfully receive a response", func() {
+			// buf := make([]byte, 2048)
+			// Expect(BIO_read(b, buf, 2048)).To(Equal(2048))
+			// buf := make([]byte, 50)
+			// Expect(BIO_read(b, buf, 1024)).To(Equal(1024))
+			// Expect(BIO_read(b, buf, 50)).To(Equal(len(buf)))
+			// })
+
+			// It("Should reset successfully", func() {
+			// 	Expect(BIO_reset(b)).To(Equal(1))
+			// })
+
+			It("Should free the connection", func() {
 				Expect(BIO_free(b)).To(Equal(1))
 			})
 		})

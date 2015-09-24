@@ -125,40 +125,36 @@ int BIO_puts(BIO *bp, const char *buf);
 int BIO_printf(BIO *bio, const char *format, ...);
 long BIO_seek(BIO *bp, int ofs);
 long BIO_flush(BIO *bp);
+int BIO_reset(BIO *b);
 
 %typemap(gotype) char *outbuf %{[]byte%}
 %typemap(in) char *outbuf {
-	char tbuf[sizeof($input.array)*sizeof(char*)];
-	$1 = (char *)&tbuf;
+    $1 = (char*)malloc($input.cap);
 }
 %typemap(argout) char *outbuf {
-	memcpy($input.array, $1, $input.cap);
-	$input.len = strlen($1);
+    memcpy($input.array, $1, $input.cap);
+}
+%typemap(freearg) char *outbuf {
+    free($1);
 }
 
 int BIO_gets(BIO *bp, char *outbuf, int size);
 
 %typemap(gotype) void *buf %{[]byte%}
-%typemap(in) void *buf {
-    char tbuf[sizeof($input.array)*sizeof(char*)];
-    $1 = (void*)&tbuf;
-}
-%typemap(argout) void *buf {
-    memcpy($input.array, $1, $input.cap);
-    $input.len = strlen($1);
-}
+%apply char *outbuf { void *buf }
 
 int BIO_read(BIO *b, void *buf, int len);
 
 %typemap(gotype) const void *buf %{string%}
 %typemap(in) const void *buf {
-    char tbuf[sizeof($input.p)*sizeof(char*)];
-    $1 = (const void*)&tbuf;
+    $1 = (void*)malloc($input.n);
     memcpy($1, $input.p, $input.n);
 }
 %typemap(argout) const void *buf {
     $input.p = $1;
-    $input.n = strlen($1);
+}
+%typemap(freearg) const void *buf {
+    free($1);
 }
 
 int BIO_write(BIO *b, const void *buf, int len);
@@ -197,16 +193,4 @@ BIO *BIO_new_ssl_connect(SSL_CTX *ctx);
 // int SSL_CTX_set_cipher_list(SSL_CTX *, const char *str);
 // int SSL_set_cipher_list(SSL *s, const char *str);
 
-// BIO_METHOD *BIO_s_connect(void);
-// BIO *BIO_new_connect(const char *host_port);
 // #define BIO_get_ssl(b,sslp)     BIO_ctrl(b,BIO_C_GET_SSL,0,(char *)sslp)
-// long BIO_ctrl(BIO *bp, int cmd, long larg, void *parg);
-// #define BIO_set_conn_hostname(b,name) BIO_ctrl(b,BIO_C_SET_CONNECT,0,(char *)name)
-// #define BIO_set_conn_port(b,port) BIO_ctrl(b,BIO_C_SET_CONNECT,1,(char *)port)
-// #define BIO_set_conn_ip(b,ip)     BIO_ctrl(b,BIO_C_SET_CONNECT,2,(char *)ip)
-// #define BIO_set_conn_int_port(b,port) BIO_ctrl(b,BIO_C_SET_CONNECT,3,(char *)port)
-// #define BIO_get_conn_hostname(b)  BIO_ptr_ctrl(b,BIO_C_GET_CONNECT,0)
-// #define BIO_get_conn_port(b)      BIO_ptr_ctrl(b,BIO_C_GET_CONNECT,1)
-// #define BIO_get_conn_ip(b)               BIO_ptr_ctrl(b,BIO_C_GET_CONNECT,2)
-// #define BIO_get_conn_int_port(b) BIO_int_ctrl(b,BIO_C_GET_CONNECT,3,0)
-// #define BIO_set_nbio(b,n)       BIO_ctrl(b,BIO_C_SET_NBIO,(n),NULL)
