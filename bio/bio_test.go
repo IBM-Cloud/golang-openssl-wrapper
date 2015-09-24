@@ -124,29 +124,26 @@ var _ = Describe("Bio", func() {
 				Expect(BIO_do_connect(b)).To(BeEquivalentTo(1))
 			})
 
-			// It("Should reset successfully", func() {
-			// 	Expect(BIO_reset(b)).To(Equal(1))
-			// })
+			It("Should reset successfully", func() {
+				Expect(BIO_reset(b)).To(Equal(0))
+			})
 
-			// It("Should connect successfully after resetting", func() {
-			// 	Expect(BIO_do_connect(b)).To(BeEquivalentTo(1))
-			// })
+			It("Should connect successfully after resetting", func() {
+				Expect(BIO_do_connect(b)).To(BeEquivalentTo(1))
+			})
 
 			It("Should execute the request successfully", func() {
 				Expect(BIO_write(b, request, len(request))).To(Equal(len(request)))
 			})
 
 			// It("Should successfully receive a response", func() {
-			// buf := make([]byte, 2048)
-			// Expect(BIO_read(b, buf, 2048)).To(Equal(2048))
-			// buf := make([]byte, 50)
-			// Expect(BIO_read(b, buf, 1024)).To(Equal(1024))
-			// Expect(BIO_read(b, buf, 50)).To(Equal(len(buf)))
+			// 	buf := make([]byte, 2048)
+			// 	Expect(BIO_read(b, buf, len(buf))).To(Equal(len(buf)))
 			// })
 
-			// It("Should reset successfully", func() {
-			// 	Expect(BIO_reset(b)).To(Equal(1))
-			// })
+			It("Should reset successfully", func() {
+				Expect(BIO_reset(b)).To(Equal(0))
+			})
 
 			It("Should free the connection", func() {
 				Expect(BIO_free(b)).To(Equal(1))
