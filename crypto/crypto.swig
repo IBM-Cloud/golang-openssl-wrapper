@@ -24,15 +24,13 @@
 
 %typemap(gotype) char *outbuf %{[]byte%}
 %typemap(in) char *outbuf {
-    char tbuf[sizeof($input.array)*sizeof(char*)];
-    $1 = (char *)&tbuf;
+    $1 = (char*)malloc($input.cap);
 }
-
 %typemap(argout) char *outbuf {
-//	printf("We have: %s\n", $1);
-    size_t len;
     memcpy($input.array, $1, $input.cap);
-    $input.len = (intgo)strlen($1);
+}
+%typemap(freearg) char *outbuf {
+    free($1);
 }
 
 
