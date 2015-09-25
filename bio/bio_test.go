@@ -102,7 +102,8 @@ var _ = Describe("Bio", func() {
 					fmt.Sprintf("User-Agent: %s", ua),
 					fmt.Sprintf("Host: %s", host),
 					"Accept: */*",
-				}, "\n") + "\n\n"
+					"\r\n",
+				}, "\r\n")
 			)
 
 			It("Should create a new bio using a connection", func() {
