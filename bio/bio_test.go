@@ -3,12 +3,17 @@ package bio_test
 import (
 	. "github.com/ScarletTanager/openssl/bio"
 
+	"encoding/json"
 	"fmt"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"io/ioutil"
 	"strings"
 )
+
+type UserAgentJSON struct {
+	UserAgent string `json:"user-agent"`
+}
 
 var _ = Describe("Bio", func() {
 	Describe("Basic I/O", func() {
@@ -89,11 +94,12 @@ var _ = Describe("Bio", func() {
 
 		Context("Using a connection", func() {
 			var (
-				host    = "www.google.com"
+				host    = "httpbin.org"
 				port    = "http"
+				ua      = "https://github.com/ScarletTanager/openssl"
 				request = strings.Join([]string{
-					"HEAD / HTTP/1.1",
-					"User-Agent: https://github.com/ScarletTanager/openssl",
+					"GET /user-agent HTTP/1.1",
+					fmt.Sprintf("User-Agent: %s", ua),
 					fmt.Sprintf("Host: %s", host),
 					"Accept: */*",
 				}, "\n") + "\n\n"
@@ -137,8 +143,14 @@ var _ = Describe("Bio", func() {
 			})
 
 			It("Should successfully receive a response", func() {
+				var d UserAgentJSON
 				buf := make([]byte, 1024)
-				Expect(BIO_read(b, buf, len(buf))).To(BeNumerically(">", 0))
+				l := BIO_read(b, buf, len(buf))
+				Expect(l).To(BeNumerically(">", 0))
+				s := strings.Split(string(buf[:l]), "\r\n\r\n")
+				e := json.Unmarshal([]byte(s[1]), &d)
+				Expect(e).To(BeNil())
+				Expect(d.UserAgent).To(Equal(ua))
 			})
 
 			It("Should reset successfully", func() {
