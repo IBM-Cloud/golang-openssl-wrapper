@@ -61,31 +61,28 @@ func (h HttpsConn) RemoteAddr() net.Addr {
 	return nil
 }
 
-func (h HttpsConn) SetDeadLine(t time.Time) error {
+func validateDeadline(t time.Time) error {
 	now := time.Now()
 	if t.Equal(now) || t.Before(now) {
 		return errors.New("Invalid deadline")
 	}
 
+	if t.After(now.Add(time.Duration(10) * time.Minute)) {
+		return errors.New("Deadline beyond allowed horizon")
+	}
+
 	return nil
+}
+func (h HttpsConn) SetDeadLine(t time.Time) error {
+	return validateDeadline(t)
 }
 
 func (h HttpsConn) SetReadDeadLine(t time.Time) error {
-	now := time.Now()
-	if t.Equal(now) || t.Before(now) {
-		return errors.New("Invalid deadline")
-	}
-
-	return nil
+	return validateDeadline(t)
 }
 
 func (h HttpsConn) SetWriteDeadLine(t time.Time) error {
-	now := time.Now()
-	if t.Equal(now) || t.Before(now) {
-		return errors.New("Invalid deadline")
-	}
-
-	return nil
+	return validateDeadline(t)
 }
 
 /*

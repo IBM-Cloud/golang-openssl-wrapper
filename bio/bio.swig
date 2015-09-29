@@ -110,6 +110,7 @@ BIO_METHOD *   BIO_s_mem(void);
 BIO_METHOD *   BIO_s_file(void);
 
 extern int BIO_free(BIO *a);
+extern void BIO_free_all(BIO *a);
 extern BIO *BIO_new(BIO_METHOD *method);
 // extern int BIO_make_bio_pair(BIO *bp1, BIO *bp2);
 
@@ -168,7 +169,7 @@ int BIO_write(BIO *b, const void *buf, int len);
 // BIO_METHOD *BIO_s_connect(void);
 extern BIO *BIO_new_connect(char *name);
 extern long BIO_do_connect(BIO *bp);
-// extern long BIO_do_handshake(BIO *bp);
+extern long BIO_do_handshake(BIO *bp);
 
 /*
  * From openssl/ssl.h
