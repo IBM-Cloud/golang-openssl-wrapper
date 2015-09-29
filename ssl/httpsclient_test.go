@@ -3,12 +3,12 @@ package ssl_test
 import (
 	. "github.com/ScarletTanager/openssl/ssl"
 
-	"fmt"
+	// "fmt"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"net/http"
-	"net/http/httptest"
-	"net/url"
+	// "net/http/httptest"
+	// "net/url"
 	"time"
 )
 
@@ -16,27 +16,28 @@ var _ = Describe("Httpsclient", func() {
 
 	var t http.Transport
 	var h HttpsConn
-	var server *httptest.Server
+	// var server *httptest.Server
 
 	BeforeEach(func() {
 		/*
 		 * Setup our mock HTTPS server
 		 */
-		server = httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			fmt.Fprintln(w, "TESTING")
-		}))
-		Expect(server).NotTo(BeNil())
+		// server = httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// 	fmt.Fprintln(w, "TESTING")
+		// }))
+		// Expect(server).NotTo(BeNil())
 
-		t = NewHttpsTransport(func(req *http.Request) (*url.URL, error) {
-			return url.Parse(server.URL)
-		})
+		// t = NewHttpsTransport(func(req *http.Request) (*url.URL, error) {
+		// 	return url.Parse(server.URL)
+		// })
+		t = NewHttpsTransport(nil)
 		Expect(t).NotTo(BeNil())
 
 	})
 
-	AfterEach(func() {
-		server.Close()
-	})
+	// AfterEach(func() {
+	// 	server.Close()
+	// })
 
 	Context("Establishing a connection", func() {
 		It("Should error for an invalid network type", func() {
@@ -48,7 +49,7 @@ var _ = Describe("Httpsclient", func() {
 
 	Context("Performing socket I/O", func() {
 		BeforeEach(func() {
-			conn, err := t.Dial("tcp", "www.hillbilly.de:777")
+			conn, err := t.Dial("tcp", "www.random.org:443")
 			Expect(err).NotTo(HaveOccurred())
 			h = conn.(HttpsConn)
 		})
@@ -84,7 +85,7 @@ var _ = Describe("Httpsclient", func() {
 		})
 
 		It("Should not allow setting a deadline more than ten (10) minutes in the future", func() {
-			bogus := now.Add(time.Duration(10) * time.Minute)
+			bogus := now.Add(time.Duration(11) * time.Minute)
 			Expect(h.SetDeadLine(bogus)).NotTo(Succeed())
 			Expect(h.SetReadDeadLine(bogus)).NotTo(Succeed())
 			Expect(h.SetWriteDeadLine(bogus)).NotTo(Succeed())
