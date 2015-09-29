@@ -110,6 +110,7 @@ BIO_METHOD *   BIO_s_mem(void);
 BIO_METHOD *   BIO_s_file(void);
 
 extern int BIO_free(BIO *a);
+extern void BIO_free_all(BIO *a);
 extern BIO *BIO_new(BIO_METHOD *method);
 // extern int BIO_make_bio_pair(BIO *bp1, BIO *bp2);
 
