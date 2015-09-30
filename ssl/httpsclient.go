@@ -37,18 +37,38 @@ type HttpsConn struct {
 }
 
 func (h HttpsConn) Read(b []byte) (n int, err error) {
-
-	return 0, nil
+	ret := bio.BIO_read(h.sslBio, b, len(b))
+	if ret < 0 {
+		return ret, fmt.Errorf("Possible socket read error - got %d from BIO_read()", ret)
+	}
+	return ret, nil
 }
 
 func (h HttpsConn) Write(b []byte) (n int, err error) {
+	ret := bio.BIO_write(h.sslBio, string(b), len(b))
+	if ret != len(b) {
+		return ret, fmt.Errorf("SSL socket write failed; only %d bytes written out of %d", ret, len(b))
+	}
 
-	return 0, nil
+	return ret, nil
 }
 
 func (h HttpsConn) Close() error {
+	if (h.ctx != nil) && (h.sslInst != nil) && (h.sslBio != nil) {
+		SSL_CTX_free(h.ctx)
+		h.ctx = nil
+		SSL_free(h.sslInst)
+		h.sslInst = nil
+		bio.BIO_free_all(h.sslBio)
+		h.sslBio = nil
+		return nil
+	}
 
-	return nil
+	if (h.ctx != nil) || (h.sslInst != nil) || (h.sslBio != nil) {
+		return errors.New("HttpsConn in partially closed state, not all objects freed, unable to close further")
+	}
+
+	return errors.New("Attempted to close already closed HttpsConn")
 }
 
 func (h HttpsConn) LocalAddr() net.Addr {

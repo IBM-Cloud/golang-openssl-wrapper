@@ -9,6 +9,8 @@ import (
 	"net/http"
 	// "net/http/httptest"
 	// "net/url"
+	"fmt"
+	"strings"
 	"time"
 )
 
@@ -16,9 +18,23 @@ var _ = Describe("Httpsclient", func() {
 
 	var t http.Transport
 	var h HttpsConn
+	var host, port, resource, ua, dest, requestContent string
 	// var server *httptest.Server
 
 	BeforeEach(func() {
+		host = "www.random.org"
+		port = "443"
+		ua = "https://github.com/ScarletTanager/openssl"
+		/* Fetch a single 8 character string in plaintext format */
+		resource = "/strings/?num=1&len=8&digits=on&upperalpha=on&loweralpha=on&unique=on&format=plain&rnd=new"
+		requestContent = strings.Join([]string{
+			fmt.Sprintf("GET %s HTTP/1.1", resource),
+			fmt.Sprintf("User-Agent: %s", ua),
+			fmt.Sprintf("Host: %s", host),
+			"Accept: */*",
+			"\r\n",
+		}, "\r\n")
+		dest = host + ":" + port
 		/*
 		 * Setup our mock HTTPS server
 		 */
@@ -32,7 +48,9 @@ var _ = Describe("Httpsclient", func() {
 		// })
 		t = NewHttpsTransport(nil)
 		Expect(t).NotTo(BeNil())
-
+		conn, err := t.Dial("tcp", dest)
+		Expect(err).NotTo(HaveOccurred())
+		h = conn.(HttpsConn)
 	})
 
 	// AfterEach(func() {
@@ -48,22 +66,19 @@ var _ = Describe("Httpsclient", func() {
 	})
 
 	Context("Performing socket I/O", func() {
-		BeforeEach(func() {
-			conn, err := t.Dial("tcp", "www.random.org:443")
-			Expect(err).NotTo(HaveOccurred())
-			h = conn.(HttpsConn)
+		AfterEach(func() {
+			h.Close()
 		})
 
-		It("Should read from the connection", func() {
-			b := make([]byte, 50)
-			Expect(h.Read(b)).To(BeNumerically(">", 0))
+		It("Should write to the connection and read the response", func() {
+			wb := []byte(requestContent)
+			Expect(h.Write(wb)).To(BeNumerically(">=", len(wb)))
+			rb := make([]byte, 50)
+			Expect(h.Read(rb)).To(BeNumerically(">", 0))
 		})
+	})
 
-		It("Should write to the connection", func() {
-			b := []byte("String to turn into bytes")
-			Expect(h.Write(b)).To(BeNumerically(">=", len(b)))
-		})
-
+	Context("Connection management", func() {
 		It("Should not allow closing of an already closed connection", func() {
 			h.Close()
 			Expect(h.Close()).NotTo(Succeed())
