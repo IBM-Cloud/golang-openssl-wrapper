@@ -94,9 +94,16 @@ var _ = Describe("Bio", func() {
 
 		Context("Using a connection", func() {
 			var (
-				host    = "httpbin.org"
-				port    = "http"
-				ua      = "https://github.com/ScarletTanager/openssl"
+				host, port, ua, request string
+			)
+
+			/*
+			 * Setup a basic connect BIO, configure it, make the connection
+			 */
+			BeforeEach(func() {
+				host = "httpbin.org"
+				port = "http"
+				ua = "https://github.com/ScarletTanager/openssl"
 				request = strings.Join([]string{
 					"GET /user-agent HTTP/1.1",
 					fmt.Sprintf("User-Agent: %s", ua),
@@ -104,46 +111,32 @@ var _ = Describe("Bio", func() {
 					"Accept: */*",
 					"\r\n",
 				}, "\r\n")
-			)
-
-			It("Should create a new bio using a connection", func() {
 				b = BIO_new(BIO_s_connect())
 				Expect(b).NotTo(BeNil())
+				Expect(BIO_set_conn_hostname(b, host)).To(BeEquivalentTo(1))
+				Expect(BIO_set_conn_port(b, port)).To(BeEquivalentTo(1))
+				Expect(BIO_do_connect(b)).To(BeEquivalentTo(1))
 			})
 
-			It("Should set the hostname of the connection", func() {
-				Expect(BIO_set_conn_hostname(b, host)).To(BeEquivalentTo(1))
+			AfterEach(func() {
+				Expect(BIO_free(b)).To(Equal(1))
 			})
 
 			It("Should return the correct host", func() {
 				Expect(BIO_get_conn_hostname(b)).To(Equal(host))
 			})
 
-			It("Should set the port of the connection", func() {
-				Expect(BIO_set_conn_port(b, port)).To(BeEquivalentTo(1))
-			})
-
 			It("Should return the correct port", func() {
 				Expect(BIO_get_conn_port(b)).To(Equal(port))
 			})
 
-			It("Should connect successfully", func() {
-				Expect(BIO_do_connect(b)).To(BeEquivalentTo(1))
-			})
-
-			It("Should reset successfully", func() {
-				Expect(BIO_reset(b)).To(Equal(0))
-			})
-
 			It("Should connect successfully after resetting", func() {
+				Expect(BIO_reset(b)).To(Equal(0))
 				Expect(BIO_do_connect(b)).To(BeEquivalentTo(1))
 			})
 
-			It("Should execute the request successfully", func() {
+			It("Should send a request and receive a response", func() {
 				Expect(BIO_write(b, request, len(request))).To(Equal(len(request)))
-			})
-
-			It("Should successfully receive a response", func() {
 				var d UserAgentJSON
 				buf := make([]byte, 1024)
 				l := BIO_read(b, buf, len(buf))
@@ -152,14 +145,6 @@ var _ = Describe("Bio", func() {
 				e := json.Unmarshal([]byte(s[1]), &d)
 				Expect(e).To(BeNil())
 				Expect(d.UserAgent).To(Equal(ua))
-			})
-
-			It("Should reset successfully", func() {
-				Expect(BIO_reset(b)).To(Equal(0))
-			})
-
-			It("Should free the connection", func() {
-				Expect(BIO_free(b)).To(Equal(1))
 			})
 		})
 
