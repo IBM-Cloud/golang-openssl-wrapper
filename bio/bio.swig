@@ -169,10 +169,19 @@ int BIO_append_filename(BIO *b, char *name);
 int BIO_rw_filename(BIO *b, char *name);
 
 /* Connect */
-// BIO_METHOD *BIO_s_connect(void);
+BIO_METHOD *BIO_s_connect(void);
 extern BIO *BIO_new_connect(char *name);
 extern long BIO_do_connect(BIO *bp);
 extern long BIO_do_handshake(BIO *bp);
+
+long BIO_set_conn_hostname(BIO *b, char *name);
+long BIO_set_conn_port(BIO *b, char *port);
+// long BIO_set_conn_ip(BIO *b, char *ip);
+// long BIO_set_conn_int_port(BIO *b, char *port);
+char *BIO_get_conn_hostname(BIO *b);
+char *BIO_get_conn_port(BIO *b);
+// char *BIO_get_conn_ip(BIO *b, dummy);
+// long BIO_get_conn_int_port(BIO *b, int port);
 
 /*
  * From openssl/ssl.h
