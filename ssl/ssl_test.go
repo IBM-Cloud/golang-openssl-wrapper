@@ -9,7 +9,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = FDescribe("ssl", func() {
+var _ = Describe("ssl", func() {
 	Context("Using TLS for connections", func() {
 
 		/*

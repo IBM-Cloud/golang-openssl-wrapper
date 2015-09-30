@@ -32,7 +32,9 @@ var _ = Describe("Httpsclient", func() {
 		// })
 		t = NewHttpsTransport(nil)
 		Expect(t).NotTo(BeNil())
-
+		conn, err := t.Dial("tcp", "www.random.org:443")
+		Expect(err).NotTo(HaveOccurred())
+		h = conn.(HttpsConn)
 	})
 
 	// AfterEach(func() {
@@ -48,10 +50,8 @@ var _ = Describe("Httpsclient", func() {
 	})
 
 	Context("Performing socket I/O", func() {
-		BeforeEach(func() {
-			conn, err := t.Dial("tcp", "www.random.org:443")
-			Expect(err).NotTo(HaveOccurred())
-			h = conn.(HttpsConn)
+		AfterEach(func() {
+			h.Close()
 		})
 
 		It("Should read from the connection", func() {
@@ -63,7 +63,9 @@ var _ = Describe("Httpsclient", func() {
 			b := []byte("String to turn into bytes")
 			Expect(h.Write(b)).To(BeNumerically(">=", len(b)))
 		})
+	})
 
+	Context("Connection management", func() {
 		It("Should not allow closing of an already closed connection", func() {
 			h.Close()
 			Expect(h.Close()).NotTo(Succeed())
