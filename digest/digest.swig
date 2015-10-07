@@ -8,6 +8,7 @@
 %include "cmalloc.i"
 %include "../include/ossl_typemaps.i"
 %include "../include/evp_typ.i"
+%apply char *outbuf {unsigned char *outbuf};
 
 // %malloc(EVP_MD_CTX)
 // %free(EVP_MD_CTX)
@@ -30,7 +31,10 @@ int EVP_MD_CTX_cleanup(EVP_MD_CTX *ctx);
  */
 void EVP_MD_CTX_destroy(EVP_MD_CTX *ctx);
 
+int EVP_MD_CTX_copy(EVP_MD_CTX *out, const EVP_MD_CTX *in);
+
 int EVP_DigestInit_ex(EVP_MD_CTX *ctx, const EVP_MD *type, ENGINE *impl);
+%typemap(gotype) const void *d %{string%}
 int EVP_DigestUpdate(EVP_MD_CTX *ctx, const void *d, size_t cnt);
 int EVP_DigestFinal_ex(EVP_MD_CTX *ctx, unsigned char *outbuf, unsigned int *s);
 
@@ -40,7 +44,7 @@ int EVP_DigestFinal_ex(EVP_MD_CTX *ctx, unsigned char *outbuf, unsigned int *s);
  * on it.
  */
 int EVP_DigestInit(EVP_MD_CTX *ctx, const EVP_MD *type);
-int EVP_DigestFinal(EVP_MD_CTX *ctx, unsigned char *md, unsigned int *s);
+int EVP_DigestFinal(EVP_MD_CTX *ctx, unsigned char *outbuf, unsigned int *s);
 
 /* FIPS-approved digest/hash algorithms */
 const EVP_MD *EVP_sha(void);
