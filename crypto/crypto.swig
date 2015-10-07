@@ -11,7 +11,6 @@
 #include <openssl/bio.h>
 #include <openssl/conf.h>
 #include <openssl/crypto.h>
-#include <openssl/engine.h>
 #include <openssl/err.h>
 #include <openssl/evp.h>
 #include <openssl/ossl_typ.h>
@@ -19,19 +18,10 @@
 
 /* We may not need this, but we'll keep it here just in case */
 %import "openssl/ossl_typ.h"
+
 %include "typemaps.i"
-
-
-%typemap(gotype) char *outbuf %{[]byte%}
-%typemap(in) char *outbuf {
-    $1 = (char*)malloc($input.cap);
-}
-%typemap(argout) char *outbuf {
-    memcpy($input.array, $1, $input.cap);
-}
-%typemap(freearg) char *outbuf {
-    free($1);
-}
+%include "../include/ossl_typemaps.i"
+%include "../include/evp_typ.i"
 
 
 /*
@@ -60,14 +50,6 @@ extern int FIPS_mode(void);
 
 extern void ERR_load_crypto_strings(void);
 extern void ERR_free_strings(void);
-
-/*
- * From openssl/engine.h
- */
-
-/* Types */
-
-typedef struct engine_st ENGINE;
 
 /*
  * From openssl/evp.h
