@@ -152,8 +152,15 @@ func dialTLS(network, addr string) (net.Conn, error) {
 
 }
 
-func NewHttpsTransport(proxyFunc func(*http.Request) (*url.URL, error)) http.Transport {
-	h := http.Transport{
+func NewHttpsClient() http.Client {
+	return http.Client{
+		Transport: NewHttpsTransport(nil),
+	}
+}
+
+func NewHttpsTransport(proxyFunc func(*http.Request) (*url.URL, error)) *http.Transport {
+	// var h http.RoundTripper = &http.Transport{
+	h := &http.Transport{
 		Dial:    dialTLS,
 		DialTLS: dialTLS,
 		Proxy:   proxyFunc,
