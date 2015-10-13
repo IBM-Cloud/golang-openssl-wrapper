@@ -12,6 +12,7 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 )
 
@@ -29,11 +30,13 @@ var networksAllowed = map[string]bool{
  */
 type HttpsConn struct {
 	net.Conn
-	desthost  string
-	connected bool
-	ctx       SSL_CTX
-	sslInst   SSL
-	sslBio    bio.BIO
+	desthost   string
+	connected  bool
+	ctx        SSL_CTX
+	sslInst    SSL
+	sslBio     bio.BIO
+	remoteAddr *net.TCPAddr
+	localAddr  *net.TCPAddr
 }
 
 func (h HttpsConn) Read(b []byte) (n int, err error) {
@@ -72,13 +75,11 @@ func (h HttpsConn) Close() error {
 }
 
 func (h HttpsConn) LocalAddr() net.Addr {
-
-	return nil
+	return h.localAddr
 }
 
 func (h HttpsConn) RemoteAddr() net.Addr {
-
-	return nil
+	return h.remoteAddr
 }
 
 func validateDeadline(t time.Time) error {
@@ -123,9 +124,32 @@ func dialTLS(network, addr string) (net.Conn, error) {
 	var err error
 	var ctx SSL_CTX
 	var conn bio.BIO
+	var dest, dhost, dport string
+	var ra *net.TCPAddr
 
 	if !networksAllowed[network] {
 		return nil, fmt.Errorf("Invalid network specified: %q", network)
+	}
+
+	cc := strings.Count(addr, ":")
+	switch {
+	case cc == 0:
+		/* Default is port 443 */
+		dhost = addr
+		dport = "443"
+	case cc == 1:
+		dhost, dport, err = net.SplitHostPort(addr)
+		if err != nil {
+			return nil, errors.New("Unable to parse address")
+		}
+	case cc > 1:
+		return nil, errors.New("Invalid address specified")
+	}
+	dest = net.JoinHostPort(dhost, dport)
+
+	ra, err = net.ResolveTCPAddr(network, dest)
+	if err != nil {
+		return nil, fmt.Errorf("Unable to resolve address %s on network %s", dest, network)
 	}
 
 	ctx, err = ctxInit("")
@@ -133,7 +157,7 @@ func dialTLS(network, addr string) (net.Conn, error) {
 		return nil, err
 	}
 
-	conn, err = sslInit(ctx, addr)
+	conn, err = sslInit(ctx, dest)
 	if err != nil {
 		return nil, err
 	}
@@ -144,9 +168,10 @@ func dialTLS(network, addr string) (net.Conn, error) {
 	}
 
 	h := HttpsConn{
-		desthost: addr,
-		ctx:      ctx,
-		sslBio:   conn,
+		desthost:   addr,
+		ctx:        ctx,
+		sslBio:     conn,
+		remoteAddr: ra,
 	}
 	return h, nil
 
