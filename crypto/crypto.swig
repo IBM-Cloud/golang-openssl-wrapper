@@ -16,9 +16,6 @@
 #include <openssl/ossl_typ.h>
 %}
 
-/* We may not need this, but we'll keep it here just in case */
-%import "openssl/ossl_typ.h"
-
 %include "typemaps.i"
 %include "../include/ossl_typemaps.i"
 %include "../include/evp_typ.i"
@@ -103,7 +100,7 @@ typedef struct evp_cipher_ctx_st {
     unsigned char final[EVP_MAX_BLOCK_LENGTH]; /* possible final block */
 } EVP_CIPHER_CTX;
 
-// %malloc(EVP_CIPHER_CTX)
+
 /* Functions */
 
 extern void OpenSSL_add_all_algorithms(void);
@@ -130,11 +127,8 @@ extern int EVP_EncryptInit_ex(EVP_CIPHER_CTX *ctx, const EVP_CIPHER *type,
 	 ENGINE *impl, unsigned char *key, unsigned char *iv);
 
 
-
-%apply char *outbuf {unsigned char *out}
-// %apply int *OUTPUT {int *outl};
-%typemap(gotype) int *outl %{*int%}
-
+%apply char *CHARBUF { unsigned char *out };
+%apply int *OUTLEN { int *outl };
 extern int EVP_EncryptUpdate(EVP_CIPHER_CTX *ctx, unsigned char *out,
          int *outl, unsigned char *in, int inl);
 
