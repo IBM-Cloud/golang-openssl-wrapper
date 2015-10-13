@@ -2,13 +2,14 @@
 
 %typemap(gotype) char *outbuf %{[]byte%}
 %typemap(in) char *outbuf {
-    $1 = (char*)malloc($input.cap);
+    if ($input.len <= 0 || $input.cap <= 0) $1 = NULL;
+    else $1 = (char*)malloc($input.cap);
 }
 %typemap(argout) char *outbuf {
-    memcpy($input.array, $1, $input.cap);
+    if ($1 != NULL) memcpy($input.array, $1, $input.cap);
 }
 %typemap(freearg) char *outbuf {
-    free($1);
+    if ($1 != NULL) free($1);
 }
 
 %typemap(gotype) int *outl %{*int%}
