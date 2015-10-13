@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	// "net/url"
+	"net"
 	"strings"
 	"time"
 )
@@ -75,6 +76,47 @@ var _ = Describe("Httpsclient", func() {
 			conn, err := t.Dial("tcp", dest)
 			Expect(err).NotTo(HaveOccurred())
 			h = conn.(HttpsConn)
+		})
+
+		Context("Using a bogus hostname and/or IP address", func() {
+			var ip string
+			JustBeforeEach(func() {
+				/* Be sure your internal DNS isn't actually the SOA for ".bogus" */
+				host = "bogushost.bogus"
+				dest = host + ":" + port
+				/* Change this to an IP which cannot be resolved, which may depend on your specific network configuration */
+				ip = "10.100.10.100"
+			})
+
+			It("Errors when the hostname is unresolveable", func() {
+				conn, err := t.Dial("tcp", dest)
+				Expect(conn).To(BeNil())
+				Expect(err).To(HaveOccurred())
+			})
+
+			It("Errors when the hostname is malformed", func() {
+				baddest := dest + ":"
+				conn, err := t.Dial("tcp", baddest)
+				Expect(conn).To(BeNil())
+				Expect(err).To(HaveOccurred())
+			})
+		})
+
+		It("Should return the correct remote address", func() {
+			match := false
+			/* Build a list of the addresses for host */
+			addrs, err := net.LookupHost(host)
+			Expect(len(addrs)).To(BeNumerically(">=", 1))
+			Expect(err).NotTo(HaveOccurred())
+
+			ra, _, _ := net.SplitHostPort(h.RemoteAddr().String())
+
+			for _, a := range addrs {
+				if a == ra {
+					match = true
+				}
+			}
+			Expect(match).To(Equal(true))
 		})
 
 		It("Should error for an invalid network type", func() {
