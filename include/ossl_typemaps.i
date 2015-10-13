@@ -24,4 +24,4 @@
     free($1);
 }
 
-%typemap(gotype) int *outl %{*int%}
+%typemap(gotype) int *OUTLEN %{*int%}
