@@ -8,7 +8,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/ScarletTanager/openssl/bio"
-	"github.com/ScarletTanager/openssl/crypto"
 	"net"
 	"net/http"
 	"net/url"
@@ -152,7 +151,7 @@ func dialTLS(network, addr string) (net.Conn, error) {
 		return nil, fmt.Errorf("Unable to resolve address %s on network %s", dest, network)
 	}
 
-	ctx, err = ctxInit("")
+	ctx, err = ctxInit("", SSLv23_client_method())
 	if err != nil {
 		return nil, err
 	}
@@ -191,24 +190,6 @@ func NewHttpsTransport(proxyFunc func(*http.Request) (*url.URL, error)) *http.Tr
 		Proxy:   proxyFunc,
 	}
 	return h
-}
-
-func ctxInit(config string) (SSL_CTX, error) {
-	SSL_load_error_strings()
-	if SSL_library_init() != 1 {
-		return nil, errors.New("Unable to initialize libssl")
-	}
-	crypto.OPENSSL_config(config)
-
-	ctx := SSL_CTX_new(SSLv23_client_method())
-	if ctx == nil {
-		return nil, errors.New("Unable to initialize SSL context")
-	}
-
-	SSL_CTX_set_verify(ctx, SSL_VERIFY_NONE, nil)
-	SSL_CTX_set_verify_depth(ctx, 4)
-
-	return ctx, nil
 }
 
 func sslInit(ctx SSL_CTX, hostname string) (bio.BIO, error) {
