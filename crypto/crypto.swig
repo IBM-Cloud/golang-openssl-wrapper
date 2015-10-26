@@ -14,9 +14,16 @@
 #include <openssl/err.h>
 #include <openssl/evp.h>
 #include <openssl/ossl_typ.h>
+
+/*
+ * Macros for manipulating argument type to EVP_CIPHER_CTX_ctrl()
+ */
+
+#define SET_TAG_GCM(ctx, type, arg, ptr) EVP_CIPHER_CTX_ctrl(ctx, type, arg, ptr)
+#define GET_TAG_GCM(ctx, type, arg, ptr) EVP_CIPHER_CTX_ctrl(ctx, type, arg, ptr)
 %}
 
-%include "typemaps.i"
+// %include "typemaps.i"
 %include "../include/ossl_typemaps.i"
 %include "../include/evp_typ.i"
 
@@ -117,6 +124,19 @@ extern EVP_CIPHER_CTX *EVP_CIPHER_CTX_new(void);
 extern void EVP_CIPHER_CTX_init(EVP_CIPHER_CTX *a);
 extern int EVP_CIPHER_CTX_cleanup(EVP_CIPHER_CTX *a);
 
+extern int EVP_CIPHER_CTX_ctrl(EVP_CIPHER_CTX *ctx, int type, int arg, void *ptr);
+
+%apply void *VOIDSTRINGBUF { void *ptr };
+extern int SET_TAG_GCM(EVP_CIPHER_CTX *ctx, int type, int arg, void *ptr);
+%apply char *CHARBUF { char *ptr };
+extern int GET_TAG_GCM(EVP_CIPHER_CTX *ctx, int type, int arg, char *ptr);
+
+/*
+ * Constants for EVP_CIPHER_CTX_ctrl()
+ */
+#define         EVP_CTRL_GCM_GET_TAG            0x10
+#define         EVP_CTRL_GCM_SET_TAG            0x11
+
 /*
  * As of now, for the standard use of EVP_EncryptInit_ex(), in which you pass null in for the engine,
  * you would pass in SwigcptrStruct_SS_engine_st(0) in go.  At some point we should make the API cleaner.
@@ -146,4 +166,5 @@ extern  int EVP_DecryptFinal_ex(EVP_CIPHER_CTX *ctx, unsigned char *out,
 /* Ciphers */
 const EVP_CIPHER *EVP_aes_256_cbc(void);
 const EVP_CIPHER *EVP_aes_256_cfb(void);
+const EVP_CIPHER *EVP_aes_256_gcm(void);
 const EVP_CIPHER *EVP_des_cbc(void);
