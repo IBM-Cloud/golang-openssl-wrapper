@@ -1,12 +1,14 @@
 package digest_test
 
 import (
+	"bytes"
 	"github.com/ScarletTanager/openssl/crypto"
 	. "github.com/ScarletTanager/openssl/digest"
 	"github.com/ScarletTanager/openssl/rand"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"strings"
 )
 
 var _ = Describe("Digest", func() {
@@ -60,50 +62,111 @@ var _ = Describe("Digest", func() {
 	})
 
 	Context("Hashing binary data", func() {
-		var ctx EVP_MD_CTX
-		var data []byte
-		var buf []byte
-		var seqlen int
-		var l uint
+		Context("Using the OpenSSL digest API", func() {
+			var ctx EVP_MD_CTX
+			var data []byte
+			var buf []byte
+			var seqlen int
+			var l uint
 
-		BeforeEach(func() {
-			ctx = Malloc_EVP_MD_CTX()
-			Expect(ctx).NotTo(BeNil())
-			EVP_MD_CTX_init(ctx)
-			Expect(EVP_DigestInit_ex(ctx, EVP_sha256(), SwigcptrStruct_SS_engine_st(0))).To(Equal(1))
+			BeforeEach(func() {
+				ctx = Malloc_EVP_MD_CTX()
+				Expect(ctx).NotTo(BeNil())
+				EVP_MD_CTX_init(ctx)
+				Expect(EVP_DigestInit_ex(ctx, EVP_sha256(), SwigcptrStruct_SS_engine_st(0))).To(Equal(1))
 
-			seqlen = 50
-			data = make([]byte, seqlen)
-			Expect(rand.RAND_bytes(data, seqlen)).To(Equal(1))
-			buf = make([]byte, seqlen)
-		})
+				seqlen = 50
+				data = make([]byte, seqlen)
+				Expect(rand.RAND_bytes(data, seqlen)).To(Equal(1))
+				buf = make([]byte, seqlen)
+			})
 
-		AfterEach(func() {
-			EVP_MD_CTX_cleanup(ctx)
-			Free_EVP_MD_CTX(ctx)
-		})
+			AfterEach(func() {
+				EVP_MD_CTX_cleanup(ctx)
+				Free_EVP_MD_CTX(ctx)
+			})
 
-		It("Produces identical hash values from the same binary data", func() {
-			ctx2 := Malloc_EVP_MD_CTX()
-			buf2 := make([]byte, seqlen)
-			var l2 uint
+			It("Produces identical hash values from the same binary data", func() {
+				ctx2 := Malloc_EVP_MD_CTX()
+				buf2 := make([]byte, seqlen)
+				var l2 uint
 
-			Expect(EVP_MD_CTX_copy(ctx2, ctx)).To(Equal(1))
-			Expect(EVP_DigestUpdate(ctx, string(data), int64(seqlen))).To(Equal(1))
-			Expect(EVP_DigestFinal_ex(ctx, buf, &l)).To(Equal(1))
+				Expect(EVP_MD_CTX_copy(ctx2, ctx)).To(Equal(1))
+				Expect(EVP_DigestUpdate(ctx, string(data), int64(seqlen))).To(Equal(1))
+				Expect(EVP_DigestFinal_ex(ctx, buf, &l)).To(Equal(1))
 
-			Expect(EVP_DigestUpdate(ctx2, string(data), int64(seqlen))).To(Equal(1))
-			Expect(EVP_DigestFinal_ex(ctx2, buf2, &l2)).To(Equal(1))
+				Expect(EVP_DigestUpdate(ctx2, string(data), int64(seqlen))).To(Equal(1))
+				Expect(EVP_DigestFinal_ex(ctx2, buf2, &l2)).To(Equal(1))
 
-			h1 := string(buf)
-			h2 := string(buf2)
+				h1 := string(buf)
+				h2 := string(buf2)
 
-			Expect(len(h1)).To(BeNumerically(">", 0))
-			Expect(len(h2)).To(BeNumerically(">", 0))
-			Expect(h2).To(Equal(h1))
+				Expect(len(h1)).To(BeNumerically(">", 0))
+				Expect(len(h2)).To(BeNumerically(">", 0))
+				Expect(h2).To(Equal(h1))
 
-			EVP_MD_CTX_cleanup(ctx2)
-			Free_EVP_MD_CTX(ctx2)
+				EVP_MD_CTX_cleanup(ctx2)
+				Free_EVP_MD_CTX(ctx2)
+			})
+		}) // END Context for OpenSSL digest
+
+		Context("Emulating the golang native crypto/sha256 API", func() {
+			var (
+				ret        int
+				err        error
+				data, key1 []byte
+				seqlen     int
+				hasher1    *Digest
+			)
+
+			BeforeEach(func() {
+				seqlen = 50
+				data = make([]byte, seqlen)
+				Expect(rand.RAND_bytes(data, seqlen)).To(Equal(1))
+
+				hasher1 = NewSHA256()
+				Expect(hasher1).NotTo(BeNil())
+				ret, err = hasher1.Write(data)
+				Expect(ret).To(Equal(len(data)))
+				Expect(err).NotTo(HaveOccurred())
+				key1 = hasher1.Sum(nil)
+
+				Expect(len(key1)).To(BeNumerically(">", 0))
+			})
+
+			It("Produces identical hash values from the same binary data", func() {
+				hasher2 := NewSHA256()
+				Expect(hasher2).NotTo(BeNil())
+				ret, err = hasher2.Write(data)
+				Expect(ret).To(Equal(len(data)))
+				Expect(err).NotTo(HaveOccurred())
+				key2 := hasher2.Sum(nil)
+
+				Expect(len(key2)).To(BeNumerically(">", 0))
+
+				Expect(bytes.Equal(key1, key2)).To(BeTrue())
+			})
+
+			It("Produces different hash values from different inputs", func() {
+				data2 := make([]byte, seqlen)
+				Expect(rand.RAND_bytes(data2, seqlen)).To(Equal(1))
+
+				hasher2 := NewSHA256()
+				Expect(hasher2).NotTo(BeNil())
+				ret, err = hasher2.Write(data2)
+				Expect(ret).To(Equal(len(data2)))
+				Expect(err).NotTo(HaveOccurred())
+				key2 := hasher2.Sum(nil)
+
+				Expect(len(key2)).To(BeNumerically(">", 0))
+
+				Expect(bytes.Equal(key1, key2)).To(BeFalse())
+			})
+
+			It("Appends to an existing hash key", func() {
+				newKey := hasher1.Sum(key1)
+				Expect(strings.HasPrefix(string(newKey), string(key1))).To(BeTrue())
+			})
 		})
 	})
 })
