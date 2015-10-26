@@ -4,11 +4,16 @@
 #include <openssl/evp.h>
 %}
 
-%include "typemaps.i"
 %include "cmalloc.i"
 %include "../include/ossl_typemaps.i"
 %include "../include/evp_typ.i"
-%apply char *outbuf {unsigned char *outbuf};
+%apply char *CHARBUF {unsigned char *outbuf};
+
+/*
+ * Constants
+ */
+
+#define EVP_MAX_MD_SIZE                 64
 
 // %malloc(EVP_MD_CTX)
 // %free(EVP_MD_CTX)
