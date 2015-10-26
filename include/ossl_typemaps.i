@@ -1,6 +1,9 @@
 %include "typemaps.i"
 
-%typemap(gotype) char *CHARBUF %{[]byte%}
+/*
+ * Use for writeable buffers of type char* passed as arguments
+ */
+%typemap(gotype) char *CHARBUF %{ []byte %}
 %typemap(in) char *CHARBUF {
     if ($input.len <= 0 || $input.cap <= 0) $1 = NULL;
     else $1 = (char*)malloc($input.cap);
