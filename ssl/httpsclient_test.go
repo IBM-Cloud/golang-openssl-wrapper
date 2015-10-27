@@ -17,7 +17,7 @@ import (
 var _ = Describe("Httpsclient", func() {
 
 	var t *http.Transport
-	var h HttpsConn
+	var h HTTPSConn
 	var host, resource string
 	var respLen int
 	var port, ua, dest, requestContent string
@@ -35,7 +35,7 @@ var _ = Describe("Httpsclient", func() {
 
 	Context("Using the golang http.Client", func() {
 		It("Should fetch a resource successfully", func() {
-			client := NewHttpsClient()
+			client := NewHTTPSClient()
 			urlPath := "https://" + host + resource
 			response, err := client.Get(urlPath)
 			Expect(err).To(BeNil())
@@ -60,22 +60,12 @@ var _ = Describe("Httpsclient", func() {
 				"\r\n",
 			}, "\r\n")
 			dest = host + ":" + port
-			/*
-			 * Setup our mock HTTPS server
-			 */
-			// server = httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			// 	fmt.Fprintln(w, "TESTING")
-			// }))
-			// Expect(server).NotTo(BeNil())
 
-			// t = NewHttpsTransport(func(req *http.Request) (*url.URL, error) {
-			// 	return url.Parse(server.URL)
-			// })
-			t = NewHttpsTransport(nil)
+			t = NewHTTPSTransport(nil)
 			Expect(t).NotTo(BeNil())
 			conn, err := t.Dial("tcp", dest)
 			Expect(err).NotTo(HaveOccurred())
-			h = conn.(HttpsConn)
+			h = conn.(HTTPSConn)
 		})
 
 		Context("Using a bogus hostname and/or IP address", func() {

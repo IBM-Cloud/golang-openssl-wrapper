@@ -7,11 +7,9 @@ import (
 	"errors"
 )
 
-/*
- * Read populates the buffer argument with a pseudo-random sequence of bytes
- * read from /dev/random (this requires a system with /dev/random).
- * Behavior is as for golang's crypto/rand.Read()
- */
+// Read populates buf with a pseudo-random sequence of bytes read from /dev/random.
+// This requires a system with /dev/random.
+// Behavior is as for golang's crypto/rand.Read()
 func Read(buf []byte) (int, error) {
 	l := cap(buf)
 	r := RAND_bytes(buf, l)
