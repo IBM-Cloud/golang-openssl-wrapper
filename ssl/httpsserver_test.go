@@ -19,6 +19,13 @@ var _ = Describe("Httpsserver", func() {
 		res, e := client.Get(url)
 		Expect(e).To(BeNil())
 		Expect(res).NotTo(BeNil())
+
+		body := make([]byte, 200)
+		i, e := res.Body.Read(body)
+		Expect(e).To(BeNil())
+		Expect(i).To(BeNumerically(">", 0))
+		Expect(string(body[:i])).To(Equal("ALOHA!!"))
+		Expect(res.Body.Close()).To(BeNil())
 	})
 
 	It("Should get a valid response from the /server endpoint", func() {
@@ -27,6 +34,9 @@ var _ = Describe("Httpsserver", func() {
 		res, e := client.Get(url)
 		Expect(e).To(BeNil())
 		Expect(res).NotTo(BeNil())
+
+		Expect(res.Header.Get("Server")).To(Equal("https://github.com/IBM-Bluemix/golang-openssl-wrapper"))
+		Expect(res.Body.Close()).To(BeNil())
 	})
 
 	It("Should get a valid response from the /mux endpoint", func() {
@@ -35,6 +45,13 @@ var _ = Describe("Httpsserver", func() {
 		res, e := client.Get(url)
 		Expect(e).To(BeNil())
 		Expect(res).NotTo(BeNil())
+
+		body := make([]byte, 200)
+		i, e := res.Body.Read(body)
+		Expect(e).To(BeNil())
+		Expect(i).To(BeNumerically(">", 0))
+		Expect(string(body[:i])).To(Equal("Using gorilla/mux"))
+		Expect(res.Body.Close()).To(BeNil())
 	})
 })
 
