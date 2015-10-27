@@ -1,14 +1,12 @@
 package ssl
 
 import (
-	"errors"
-	// "github.com/ScarletTanager/openssl/crypto"
 	"bufio"
+	"errors"
 	"fmt"
 	"net"
 	"net/http"
 	"os"
-	// "sync"
 )
 
 func Handle(pattern string, handler http.Handler) {
