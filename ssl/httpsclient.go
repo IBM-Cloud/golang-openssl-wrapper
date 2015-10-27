@@ -1,7 +1,7 @@
 package ssl
 
 /*
- * Module: httpsconn
+ * Module: httpsclient.go
  */
 
 import (
@@ -24,10 +24,8 @@ var networksAllowed = map[string]bool{
 	"ip6":  true,
 }
 
-/*
- * Implements net.Conn
- */
-type HttpsConn struct {
+// HTTPSConn extends net.Conn to provide HTTPS functions using OpenSSL.
+type HTTPSConn struct {
 	net.Conn
 	desthost   string
 	connected  bool
@@ -38,7 +36,9 @@ type HttpsConn struct {
 	localAddr  *net.TCPAddr
 }
 
-func (h HttpsConn) Read(b []byte) (n int, err error) {
+// Read reads n bytes from the connection into b.
+// Read returns the number of bytes read or 0 and an error if the underlying read fails.
+func (h HTTPSConn) Read(b []byte) (n int, err error) {
 	ret := bio.BIO_read(h.sslBio, b, len(b))
 	if ret < 0 {
 		return ret, fmt.Errorf("Possible socket read error - got %d from BIO_read()", ret)
@@ -46,7 +46,9 @@ func (h HttpsConn) Read(b []byte) (n int, err error) {
 	return ret, nil
 }
 
-func (h HttpsConn) Write(b []byte) (n int, err error) {
+// Write writes n bytes from b onto the connection.
+// Write returns the number of bytes written and any error that occurred.
+func (h HTTPSConn) Write(b []byte) (n int, err error) {
 	ret := bio.BIO_write(h.sslBio, string(b), len(b))
 	if ret != len(b) {
 		return ret, fmt.Errorf("SSL socket write failed; only %d bytes written out of %d", ret, len(b))
@@ -55,7 +57,9 @@ func (h HttpsConn) Write(b []byte) (n int, err error) {
 	return ret, nil
 }
 
-func (h HttpsConn) Close() error {
+// Close closes the underlying connection.
+// Close will return an error if it is invoked on a partially or already closed connection.
+func (h HTTPSConn) Close() error {
 	if (h.ctx != nil) && (h.sslInst != nil) && (h.sslBio != nil) {
 		SSL_CTX_free(h.ctx)
 		h.ctx = nil
@@ -67,17 +71,19 @@ func (h HttpsConn) Close() error {
 	}
 
 	if (h.ctx != nil) || (h.sslInst != nil) || (h.sslBio != nil) {
-		return errors.New("HttpsConn in partially closed state, not all objects freed, unable to close further")
+		return errors.New("HTTPSConn in partially closed state, not all objects freed, unable to close further")
 	}
 
-	return errors.New("Attempted to close already closed HttpsConn")
+	return errors.New("Attempted to close already closed HTTPSConn")
 }
 
-func (h HttpsConn) LocalAddr() net.Addr {
+// LocalAddr returns the local address as a net.Addr.
+func (h HTTPSConn) LocalAddr() net.Addr {
 	return h.localAddr
 }
 
-func (h HttpsConn) RemoteAddr() net.Addr {
+// RemoteAddr returns the remote address for the connection as a net.Addr.
+func (h HTTPSConn) RemoteAddr() net.Addr {
 	return h.remoteAddr
 }
 
@@ -93,15 +99,23 @@ func validateDeadline(t time.Time) error {
 
 	return nil
 }
-func (h HttpsConn) SetDeadLine(t time.Time) error {
+
+// SetDeadLine sets the deadline for both reads and writes.
+// t should be a time.Time representing a relative interval, such as 10 minutes.
+// SetDeadline, SetReadDeadline, and SetWriteDeadLine will all return an error
+// if t equals the current time or is before it.
+// They will also return an error for an interval longer than 10 minutes.
+func (h HTTPSConn) SetDeadLine(t time.Time) error {
 	return validateDeadline(t)
 }
 
-func (h HttpsConn) SetReadDeadLine(t time.Time) error {
+// SetReadDeadLine sets the deadline for reads.
+func (h HTTPSConn) SetReadDeadLine(t time.Time) error {
 	return validateDeadline(t)
 }
 
-func (h HttpsConn) SetWriteDeadLine(t time.Time) error {
+// SetWriteDeadLine sets the deadline for writes.
+func (h HTTPSConn) SetWriteDeadLine(t time.Time) error {
 	return validateDeadline(t)
 }
 
@@ -114,7 +128,7 @@ func dial(network, addr string) (net.Conn, error) {
 }
 
 /*
- * dialTLS() Returns an httpsclient.HttpsConn instance.
+ * dialTLS() Returns an httpsclient.HTTPSConn instance.
  * We inject the BIO object for use in I/O.
  * We inject the CTX and SSL objects for use in connection
  * management.
@@ -166,7 +180,7 @@ func dialTLS(network, addr string) (net.Conn, error) {
 		return nil, err
 	}
 
-	h := HttpsConn{
+	h := HTTPSConn{
 		desthost:   addr,
 		ctx:        ctx,
 		sslBio:     conn,
@@ -176,14 +190,18 @@ func dialTLS(network, addr string) (net.Conn, error) {
 
 }
 
-func NewHttpsClient() http.Client {
+// NewHTTPSClient returns an http.Client configured to use OpenSSL for TLS.
+// The client cannot be used for non-TLS communications - use a regular http.Client instead.
+// This is a convenience function wrapping NewHTTPSTransport.
+func NewHTTPSClient() http.Client {
 	return http.Client{
-		Transport: NewHttpsTransport(nil),
+		Transport: NewHTTPSTransport(nil),
 	}
 }
 
-func NewHttpsTransport(proxyFunc func(*http.Request) (*url.URL, error)) *http.Transport {
-	// var h http.RoundTripper = &http.Transport{
+// NewHTTPSTransport returns an http.Transport configured to use OpenSSL for TLS.
+// The transport cannot be used for non-TLS communications - use a regular http.Transport instead.
+func NewHTTPSTransport(proxyFunc func(*http.Request) (*url.URL, error)) *http.Transport {
 	h := &http.Transport{
 		Dial:    dialTLS,
 		DialTLS: dialTLS,
