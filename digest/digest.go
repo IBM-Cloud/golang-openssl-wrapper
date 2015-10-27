@@ -8,11 +8,16 @@ import (
 	"io"
 )
 
+// Digest represents a single message digest.
+// It implements the hash.Hash interface.
 type Digest struct {
 	io.Writer
 	context EVP_MD_CTX
 }
 
+// Write stores the contents of p in the digest.
+// p is a slice of bytes representing the message used to calculate the checksum/hash.
+// Write returns the number of bytes written and an error (which is always nil).
 func (d *Digest) Write(p []byte) (int, error) {
 	ret := EVP_DigestUpdate(d.context, string(p), int64(len(p)))
 	if ret != 1 {
@@ -21,6 +26,9 @@ func (d *Digest) Write(p []byte) (int, error) {
 	return len(p), nil
 }
 
+// Sum returns the current checksum value for the Digest.
+// If p is nil, the bare checksum is returned.
+// If p is not nil, the checksum is appended to p, which is then returned.
 func (d *Digest) Sum(p []byte) []byte {
 	var (
 		l uint
@@ -43,6 +51,17 @@ func (d *Digest) Sum(p []byte) []byte {
 	return buf
 }
 
+// Size returns the the length of the Digest's checksum (what Sum() will return)
+func (d *Digest) Size() int {
+	return EVP_MD_CTX_size(d.context)
+}
+
+// BlockSize returns the underlying block size for the Digest.
+func (d *Digest) BlockSize() int {
+	return EVP_MD_CTX_block_size(d.context)
+}
+
+// NewSHA256 returns a pointer to a Digest configured to use the SHA256 algorithm.
 func NewSHA256() *Digest {
 	ctx := EVP_MD_CTX_create()
 
@@ -57,7 +76,3 @@ func NewSHA256() *Digest {
 		context: ctx,
 	}
 }
-
-// func (d *Digest) ctx() EVP_MD_CTX {
-// 	return *d.context
-// }
