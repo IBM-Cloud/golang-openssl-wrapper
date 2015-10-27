@@ -224,6 +224,8 @@ func (s *Server) Serve(l net.Listener) error {
 
 		s.Handler.ServeHTTP(res, req)
 
+		check(req.Body.Close())
+
 		check(oc.Close())
 	}
 
