@@ -51,6 +51,14 @@ int EVP_DigestFinal_ex(EVP_MD_CTX *ctx, unsigned char *outbuf, unsigned int *s);
 int EVP_DigestInit(EVP_MD_CTX *ctx, const EVP_MD *type);
 int EVP_DigestFinal(EVP_MD_CTX *ctx, unsigned char *outbuf, unsigned int *s);
 
+/*
+ * Return digest and block sizes
+ */
+int EVP_MD_size(const EVP_MD *md);
+int EVP_MD_block_size(const EVP_MD *md);
+int EVP_MD_CTX_size(EVP_MD_CTX *ctx);
+int EVP_MD_CTX_block_size(EVP_MD_CTX *ctx);
+
 /* FIPS-approved digest/hash algorithms */
 const EVP_MD *EVP_sha(void);
 const EVP_MD *EVP_sha1(void);

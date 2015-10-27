@@ -86,6 +86,20 @@ var _ = Describe("Digest", func() {
 				Free_EVP_MD_CTX(ctx)
 			})
 
+			It("Returns the correct digest size", func() {
+				s1 := EVP_MD_CTX_size(ctx)
+				s2 := EVP_MD_size(EVP_sha256())
+				Expect(s1).To(BeNumerically(">", 0))
+				Expect(s2).To(Equal(s1))
+			})
+
+			It("Returns the correct block size", func() {
+				s1 := EVP_MD_CTX_block_size(ctx)
+				s2 := EVP_MD_block_size(EVP_sha256())
+				Expect(s1).To(BeNumerically(">", 0))
+				Expect(s2).To(Equal(s1))
+			})
+
 			It("Produces identical hash values from the same binary data", func() {
 				ctx2 := Malloc_EVP_MD_CTX()
 				buf2 := make([]byte, seqlen)
@@ -132,6 +146,18 @@ var _ = Describe("Digest", func() {
 				key1 = hasher1.Sum(nil)
 
 				Expect(len(key1)).To(BeNumerically(">", 0))
+			})
+
+			It("Returns the correct digest length", func() {
+				s := EVP_MD_size(EVP_sha256())
+				Expect(s).To(BeNumerically(">", 0))
+				Expect(hasher1.Size()).To(Equal(s))
+			})
+
+			It("Returns the correct block size", func() {
+				s := EVP_MD_block_size(EVP_sha256())
+				Expect(s).To(BeNumerically(">", 0))
+				Expect(hasher1.BlockSize()).To(Equal(s))
 			})
 
 			It("Produces identical hash values from the same binary data", func() {
