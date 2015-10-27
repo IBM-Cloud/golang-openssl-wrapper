@@ -13,7 +13,6 @@ func main() {
 	setup()
 
 	d, _ := filepath.Abs(filepath.Dir(os.Args[0]))
-	fmt.Printf("\nDIR: %s\n", d)
 
 	fmt.Println("Server listening on port 8443")
 	_, e := ssl.ListenAndServeTLS(":8443", filepath.Join(d, "../../certs/server/server.pem"),
