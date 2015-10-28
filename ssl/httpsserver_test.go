@@ -5,6 +5,7 @@ import (
 
 	"os"
 	"os/exec"
+	"time"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -78,4 +79,6 @@ func compileAndStartServer() {
 	// Run HTTPSServer
 	c = exec.Command("./httpsserver")
 	check(c.Start())
+
+	time.Sleep(2 * time.Second)
 }
