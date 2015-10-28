@@ -10,9 +10,11 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("Httpsserver", func() {
-	compileAndStartServer()
+var c *exec.Cmd
+var _ = BeforeSuite(compileAndStartServer)
+var _ = AfterSuite(cleanup)
 
+var _ = Describe("Httpsserver", func() {
 	It("Should get a valid response from the /aloha endpoint", func() {
 		client := NewHTTPSClient()
 		url := "https://localhost:8443/aloha"
@@ -55,9 +57,11 @@ var _ = Describe("Httpsserver", func() {
 	})
 })
 
-func compileAndStartServer() {
-	var c *exec.Cmd
+func cleanup() {
+	c.Process.Kill()
+}
 
+func compileAndStartServer() {
 	check := func(e error) {
 		if e != nil {
 			panic(e)
