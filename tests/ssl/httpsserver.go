@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/ScarletTanager/openssl/ssl"
+	"github.com/IBM-Bluemix/golang-openssl-wrapper/ssl"
 	"github.com/gorilla/mux"
 	"net/http"
 	"os"

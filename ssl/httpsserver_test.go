@@ -1,7 +1,7 @@
 package ssl_test
 
 import (
-	. "github.com/ScarletTanager/openssl/ssl"
+	. "github.com/IBM-Bluemix/golang-openssl-wrapper/ssl"
 
 	"os"
 	"os/exec"
