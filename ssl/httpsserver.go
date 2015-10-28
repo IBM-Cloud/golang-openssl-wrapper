@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"log"
 	"net"
 	"net/http"
 	"os"
@@ -104,8 +105,9 @@ func (r *response) WriteHeader(s int) {
 }
 
 type Server struct {
-	Addr    string
-	Handler http.Handler
+	Addr     string
+	Handler  http.Handler
+	ErrorLog *log.Logger
 
 	ctx       SSL_CTX
 	listener  net.Listener
@@ -137,6 +139,10 @@ func (s *Server) ListenAndServeTLS(cf, kf string) error {
 
 	if s.Handler == nil {
 		s.Handler = http.DefaultServeMux
+	}
+
+	if s.ErrorLog == nil {
+		s.ErrorLog = log.New(os.Stdout, "server: ", log.LstdFlags|log.Lshortfile)
 	}
 
 	ctx, e := ctxInit("", s.method)
@@ -175,7 +181,7 @@ func (s *Server) Serve(l net.Listener) error {
 
 	check := func(e error) {
 		if e != nil {
-			fmt.Printf("ERROR: %s\n", e)
+			s.ErrorLog.Printf("ERROR: %s\n", e)
 		}
 	}
 
