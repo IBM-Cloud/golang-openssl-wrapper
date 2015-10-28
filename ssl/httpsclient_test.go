@@ -1,7 +1,7 @@
 package ssl_test
 
 import (
-	. "github.com/ScarletTanager/openssl/ssl"
+	. "github.com/IBM-Bluemix/golang-openssl-wrapper/ssl"
 
 	"fmt"
 	. "github.com/onsi/ginkgo"
@@ -50,7 +50,7 @@ var _ = Describe("Httpsclient", func() {
 	Context("Working directly with the underlying Transport", func() {
 		BeforeEach(func() {
 			port = "443"
-			ua = "https://github.com/ScarletTanager/openssl"
+			ua = "https://github.com/IBM-Bluemix/golang-openssl-wrapper"
 			/* Fetch a single 8 character string in plaintext format */
 			requestContent = strings.Join([]string{
 				fmt.Sprintf("GET %s HTTP/1.1", resource),

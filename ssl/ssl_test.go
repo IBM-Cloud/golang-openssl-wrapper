@@ -1,10 +1,10 @@
 package ssl_test
 
 import (
-	. "github.com/ScarletTanager/openssl/ssl"
+	. "github.com/IBM-Bluemix/golang-openssl-wrapper/ssl"
 
-	"github.com/ScarletTanager/openssl/bio"
-	"github.com/ScarletTanager/openssl/crypto"
+	"github.com/IBM-Bluemix/golang-openssl-wrapper/bio"
+	"github.com/IBM-Bluemix/golang-openssl-wrapper/crypto"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )

@@ -2,7 +2,7 @@ package ssl
 
 import (
 	"errors"
-	"github.com/ScarletTanager/openssl/crypto"
+	"github.com/IBM-Bluemix/golang-openssl-wrapper/crypto"
 )
 
 func ctxInit(config string, method SSL_METHOD) (SSL_CTX, error) {

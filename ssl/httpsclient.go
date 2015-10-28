@@ -7,7 +7,7 @@ package ssl
 import (
 	"errors"
 	"fmt"
-	"github.com/ScarletTanager/openssl/bio"
+	"github.com/IBM-Bluemix/golang-openssl-wrapper/bio"
 	"net"
 	"net/http"
 	"net/url"
