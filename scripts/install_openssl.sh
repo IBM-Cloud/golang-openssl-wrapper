@@ -89,17 +89,23 @@ log() {
 
 verify_checksum() {
 	local PKG=$1
-	local SHA1=$(${CURL} ${DL_URL}${PKG}.tar.gz.sha1)
-	local SHA1_LOCAL=$(${OPENSSL_CMD} sha1 ${PKG}.tar.gz)
-	SHA1_LOCAL=${OSSL_SHA1_LOCAL##*= }
+	local R=$2
+	local S=1
+	log "INFO" "Retrieving checksum with ${CURL} ${DL_URL}${PKG}.sha1"
+	local SHA1=$(${CURL} ${DL_URL}${PKG}.sha1)
+	local SHA1_LOCAL=$(${OPENSSL_CMD} sha1 ${PKG})
+	SHA1_LOCAL=${SHA1_LOCAL##*= }
 
 	if [[ $SHA1 != $SHA1_LOCAL ]]; then
 		warn "Downloaded checksum (${PKG}): ${SHA1}"
 		warn "Calculated checksum (${PKG}): ${SHA1_LOCAL}"
-		printf "0"
+		S=0
 	else
-		printf "1"
+		log "INFO" "Downloaded checksum (${PKG}): ${SHA1}"
+		log "INFO" "Calculated checksum (${PKG}): ${SHA1_LOCAL}"
 	fi
+
+	eval $R="'$S'"
 }
 
 
@@ -131,19 +137,19 @@ fi
 
 cd $WORKDIR || fatal "Unable to cd to working directory ${WORKDIR}"
 
-log "INFO" "Downloading ${OSSL} source package"
+log "INFO" "Downloading ${OSSL} source package with ${CURL_CMD}${OSSL}.tar.gz"
 ${CURL_CMD}${OSSL}.tar.gz
-log "INFO" "Downloading ${FIPS} source package"
+log "INFO" "Downloading ${FIPS} source package with ${CURL_CMD}${FIPS}.tar.gz"
 ${CURL_CMD}${FIPS}.tar.gz
 
 log "INFO" "Verifying package checksums"
 
-RET=$(verify_checksum ${OSSL}.tar.gz)
+verify_checksum ${OSSL}.tar.gz RET
 if [[ $RET -ne 1  ]]; then
 	fatal "Checksums do not match for ${OSSL}.tar.gz"
 fi
 
-RET=$(verify_checksum ${FIPS}.tar.gz)
+verify_checksum ${FIPS}.tar.gz RET
 if [[ $RET -ne 1  ]]; then
 	fatal "Checksums do not match for ${FIPS}.tar.gz"
 fi
