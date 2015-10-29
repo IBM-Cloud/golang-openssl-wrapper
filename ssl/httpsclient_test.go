@@ -11,7 +11,6 @@ import (
 	// "net/url"
 	"net"
 	"strings"
-	"time"
 )
 
 var _ = Describe("Httpsclient", func() {
