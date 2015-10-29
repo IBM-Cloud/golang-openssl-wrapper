@@ -100,24 +100,26 @@ func validateDeadline(t time.Time) error {
 	return nil
 }
 
-// SetDeadLine sets the deadline for both reads and writes.
-// t should be a time.Time representing a relative interval, such as 10 minutes.
-// SetDeadline, SetReadDeadline, and SetWriteDeadLine will all return an error
-// if t equals the current time or is before it.
-// They will also return an error for an interval longer than 10 minutes.
-func (h HTTPSConn) SetDeadLine(t time.Time) error {
-	return validateDeadline(t)
-}
+// TODO: implement Set[{Read,Write}]Deadline
 
-// SetReadDeadLine sets the deadline for reads.
-func (h HTTPSConn) SetReadDeadLine(t time.Time) error {
-	return validateDeadline(t)
-}
+// // SetDeadLine sets the deadline for both reads and writes.
+// // t should be a time.Time representing a relative interval, such as 10 minutes.
+// // SetDeadline, SetReadDeadline, and SetWriteDeadLine will all return an error
+// // if t equals the current time or is before it.
+// // They will also return an error for an interval longer than 10 minutes.
+// func (h HTTPSConn) SetDeadLine(t time.Time) error {
+// 	return validateDeadline(t)
+// }
 
-// SetWriteDeadLine sets the deadline for writes.
-func (h HTTPSConn) SetWriteDeadLine(t time.Time) error {
-	return validateDeadline(t)
-}
+// // SetReadDeadLine sets the deadline for reads.
+// func (h HTTPSConn) SetReadDeadLine(t time.Time) error {
+// 	return validateDeadline(t)
+// }
+
+// // SetWriteDeadLine sets the deadline for writes.
+// func (h HTTPSConn) SetWriteDeadLine(t time.Time) error {
+// 	return validateDeadline(t)
+// }
 
 /*
  * Setup the Transport
