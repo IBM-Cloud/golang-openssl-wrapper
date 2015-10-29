@@ -15,8 +15,8 @@ func main() {
 	d, _ := filepath.Abs(filepath.Dir(os.Args[0]))
 
 	fmt.Println("Server listening on port 8443")
-	_, e := ssl.ListenAndServeTLS(":8443", filepath.Join(d, "../../certs/server/server.pem"),
-		filepath.Join(d, "../../certs/server/server.key"), nil)
+	_, e := ssl.ListenAndServeTLS(":8443", filepath.Join(d, "certs/server/server.pem"),
+		filepath.Join(d, "certs/server/server.key"), nil)
 
 	if e != nil {
 		panic(e)

@@ -69,7 +69,7 @@ func compileAndStartServer() {
 		}
 	}
 
-	check(os.Chdir("../tests/ssl"))
+	check(os.Chdir("tests"))
 
 	// Compile HTTPSServer
 	c = exec.Command("go", "build", "httpsserver.go")
