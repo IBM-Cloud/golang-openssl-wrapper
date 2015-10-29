@@ -1,0 +1,5 @@
+# Ignore bio file used during testing
+bio/*.out
+
+# Ignore httpsserver binary
+ssl/tests/httpsserver
