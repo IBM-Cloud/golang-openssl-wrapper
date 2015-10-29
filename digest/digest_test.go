@@ -2,9 +2,9 @@ package digest_test
 
 import (
 	"bytes"
-	"github.com/ScarletTanager/openssl/crypto"
-	. "github.com/ScarletTanager/openssl/digest"
-	"github.com/ScarletTanager/openssl/rand"
+	"github.com/IBM-Bluemix/golang-openssl-wrapper/crypto"
+	. "github.com/IBM-Bluemix/golang-openssl-wrapper/digest"
+	"github.com/IBM-Bluemix/golang-openssl-wrapper/rand"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
