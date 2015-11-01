@@ -1,13 +1,13 @@
 package crypto_test
 
 import (
-	. "github.com/ScarletTanager/openssl/crypto"
+	. "github.com/IBM-Bluemix/golang-openssl-wrapper/crypto"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	// "strings"
 	//	"unsafe"
-	"github.com/ScarletTanager/openssl/rand"
+	"github.com/IBM-Bluemix/golang-openssl-wrapper/rand"
 )
 
 var _ = Describe("Crypto", func() {

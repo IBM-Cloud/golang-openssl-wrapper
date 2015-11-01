@@ -1,7 +1,7 @@
 package rand_test
 
 import (
-	. "github.com/ScarletTanager/openssl/rand"
+	. "github.com/IBM-Bluemix/golang-openssl-wrapper/rand"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

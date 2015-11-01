@@ -1,7 +1,7 @@
 package bio_test
 
 import (
-	. "github.com/ScarletTanager/openssl/bio"
+	. "github.com/IBM-Bluemix/golang-openssl-wrapper/bio"
 
 	"encoding/json"
 	"fmt"
@@ -103,7 +103,7 @@ var _ = Describe("Bio", func() {
 			BeforeEach(func() {
 				host = "httpbin.org"
 				port = "http"
-				ua = "https://github.com/ScarletTanager/openssl"
+				ua = "https://github.com/IBM-Bluemix/golang-openssl-wrapper"
 				request = strings.Join([]string{
 					"GET /user-agent HTTP/1.1",
 					fmt.Sprintf("User-Agent: %s", ua),

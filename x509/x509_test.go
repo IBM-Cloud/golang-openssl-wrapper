@@ -1,9 +1,9 @@
 package x509_test
 
 import (
-	. "github.com/ScarletTanager/openssl/x509"
+	. "github.com/IBM-Bluemix/golang-openssl-wrapper/x509"
 
-	"github.com/ScarletTanager/openssl/bio"
+	"github.com/IBM-Bluemix/golang-openssl-wrapper/bio"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
