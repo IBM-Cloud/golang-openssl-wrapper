@@ -1,0 +1,8 @@
+# Travis configuration file for BlueMix OpenSSL Wrapper for Go
+language: go
+
+go:
+  - 1.4.2
+
+# before_install:
+#   # - ./install_openssl.sh
