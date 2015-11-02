@@ -4,6 +4,9 @@ language: go
 go:
   - 1.4.2
 
+env:
+  - PATH=$PATH:/usr/local/bin
+  
 before_install:
   - ./scripts/install_swig.sh
 #   # - ./install_openssl.sh
