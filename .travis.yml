@@ -5,8 +5,8 @@ go:
   - 1.4.2
 
 env:
-  - PATH=$PATH:/usr/local/bin
-  
+  - PATH=$PATH:/usr/local/bin:/tmp/deps/bin
+
 before_install:
-  - ./scripts/install_swig.sh
+  - ./scripts/install_swig.sh /tmp/deps
 #   # - ./install_openssl.sh

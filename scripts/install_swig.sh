@@ -54,7 +54,13 @@ log() {
 #
 
 WORKDIR=/tmp/install_swig.$$
-INSTALL_PREFIX=/usr/local
+if [[ $# -ge 1 ]]; then
+	INSTALL_PREFIX=$1
+else
+	INSTALL_PREFIX=/usr/local
+fi
+
+log "INFO" "Installing SWIG and PCRE under $INSTALL_PREFIX"
 
 ${MKDIR} ${WORKDIR} || fatal "Unable to create ${WORKDIR}"
 cd ${WORKDIR} 
