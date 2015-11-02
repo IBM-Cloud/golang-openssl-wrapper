@@ -5,5 +5,5 @@ go:
   - 1.4.2
 
 before_install:
-  - ./install_swig.sh
+  - ./scripts/install_swig.sh
 #   # - ./install_openssl.sh
