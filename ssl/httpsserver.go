@@ -145,6 +145,9 @@ type Server struct {
 /*
 	ListenAndServeTLS will create a new Server and call ListenAndServeTLS
 	on the Server instance.
+
+	cf should be an absolute or relative path to the certificate file.
+	kf should be an absolute or relative path to the key file.
 */
 func ListenAndServeTLS(addr, cf, kf string, handler http.Handler) (*Server, error) {
 	s := &Server{
@@ -168,6 +171,9 @@ func (s *Server) ListenAndServe() error {
 	ListenAndServeTLS will setup default values, contexts, the certificate,
 	and key file. It will then listen on the Addr set in the Server instance and
 	call Server.Serve.
+
+	cf should be an absolute or relative path to the certificate file.
+	kf should be an absolute or relative path to the key file.
 */
 func (s *Server) ListenAndServeTLS(cf, kf string) error {
 	var (
