@@ -10,14 +10,25 @@ import (
 	"os"
 )
 
+/*
+	Handle is shorthand for:
+		http.DefaultServeMux.Handle(pattern, handler)
+*/
 func Handle(pattern string, handler http.Handler) {
 	http.DefaultServeMux.Handle(pattern, handler)
 }
 
+/*
+	HandleFunc is shorthand for:
+		http.DefaultServeMux.Handler(pattern, handler)
+*/
 func HandleFunc(pattern string, handler func(http.ResponseWriter, *http.Request)) {
 	http.DefaultServeMux.HandleFunc(pattern, handler)
 }
 
+/*
+	Conn is used for incoming server connections.
+*/
 type Conn struct {
 	net.Conn
 
@@ -26,6 +37,10 @@ type Conn struct {
 	fd  int
 }
 
+/*
+	Close will free any contexts, files, and connections that are
+	associated with the Conn.
+*/
 func (c Conn) Close() error {
 	var e error
 
@@ -48,6 +63,10 @@ func (c Conn) getHandshake() error {
 	return nil
 }
 
+/*
+	Read will use SSL_read to read directly from the file descriptor
+	of the open connection.
+*/
 func (c Conn) Read(buf []byte) (int, error) {
 	result := SSL_read(c.ctx, buf, len(buf))
 	if result > 0 {
@@ -56,6 +75,10 @@ func (c Conn) Read(buf []byte) (int, error) {
 	return 0, errors.New("Unable to read from connection.")
 }
 
+/*
+	Write will use SSL_write to write directly to the file descriptor
+	of the open connection.
+*/
 func (c Conn) Write(buf []byte) (int, error) {
 	result := SSL_write(c.ctx, buf, len(buf))
 	if result > 0 {
@@ -104,6 +127,10 @@ func (r *response) WriteHeader(s int) {
 	r.Conn.Write([]byte(fmt.Sprintf("HTTP/1.1 %d\r\n", s)))
 }
 
+/*
+	Server mimics the original http.Server. It provides the same methods
+	as the original http.Server to be a drop-in replacement.
+*/
 type Server struct {
 	Addr     string
 	Handler  http.Handler
@@ -115,6 +142,10 @@ type Server struct {
 	keepalive bool
 }
 
+/*
+	ListenAndServeTLS will create a new Server and call ListenAndServeTLS
+	on the Server instance.
+*/
 func ListenAndServeTLS(addr, cf, kf string, handler http.Handler) (*Server, error) {
 	s := &Server{
 		Addr:    addr,
@@ -124,10 +155,20 @@ func ListenAndServeTLS(addr, cf, kf string, handler http.Handler) (*Server, erro
 	return s, s.ListenAndServeTLS(cf, kf)
 }
 
+/*
+	ListenAndServe is not supported by this package and will always return
+	a hardcoded error saying so. We do not support unencrypted traffic in
+	this module.
+*/
 func (s *Server) ListenAndServe() error {
 	return errors.New("You must use ListenAndServeTLS with this package. It does not support unencrypted HTTP traffic.")
 }
 
+/*
+	ListenAndServeTLS will setup default values, contexts, the certificate,
+	and key file. It will then listen on the Addr set in the Server instance and
+	call Server.Serve.
+*/
 func (s *Server) ListenAndServeTLS(cf, kf string) error {
 	var (
 		e error
@@ -172,6 +213,14 @@ func (s *Server) ListenAndServeTLS(cf, kf string) error {
 	return s.Serve(l)
 }
 
+/*
+	Serve will accept connections on the net.Listener provided. It will then call
+	Server.Handler.ServeHTTP on the resulting connection.
+
+	You should not close the connection in Server.Handler.ServeHTTP. The
+	connection will be automatically closed once Server.Handler.ServeHTTP
+	has finished.
+*/
 func (s *Server) Serve(l net.Listener) error {
 	var (
 		c net.Conn
