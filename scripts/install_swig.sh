@@ -4,14 +4,50 @@
 # Script to install Swig and its prereqs
 #
 
-DIRNAME=/usr/bin/dirname
-READLINK=/bin/readlink
-READLINKF="${READLINK} -f"
+# DIRNAME=/usr/bin/dirname
+# READLINK=/bin/readlink
+# READLINKF="${READLINK} -f"
 
-DNCMD='${DIRNAME} "$(${READLINKF} \"$0\")"'
-SCRIPT_DIR=$(eval $DNCMD)
+# DNCMD='${DIRNAME} "$(${READLINKF} \"$0\")"'
+# SCRIPT_DIR=$(eval $DNCMD)
 
-. ${SCRIPT_DIR}/scripts_profile
+# . ${SCRIPT_DIR}/scripts_profile
+UNAME=/bin/uname
+MAKE=/usr/bin/make
+CURL=/usr/bin/curl
+MKDIR=/bin/mkdir
+TAR=/bin/tar
+RM=/bin/rm
+OPENSSL_CMD=/usr/bin/openssl
+LN="/bin/ln -sf"
+
+get_os() {
+	local KERNELV=$(${UNAME} -v)
+	local FLAVOR=${KERNELV#*-}
+	FLAVOR=${FLAVOR%% *}
+	printf $FLAVOR
+}
+
+# called if we encounter a fatal error
+fatal() {
+	log "FATAL" "$1"
+	exit 0
+}
+
+error() {
+	log "ERROR" "$1"
+}
+
+warn() {
+	log "WARN" "$1"
+}
+
+log() {
+	local SEVERITY=$1
+	local MSG=$2
+	printf "%(%F %T)T" -1
+	printf "\t%-7s %s\n"  "$SEVERITY" "$MSG"
+}
 
 #
 # Download PCRE 8.37 (we've had issues with PCRE2 and swig compatibility)
