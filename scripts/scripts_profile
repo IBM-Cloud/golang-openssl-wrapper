@@ -1,0 +1,14 @@
+#
+# scripts_profile
+#
+# Script to setup common variables, etc. for use in scripts
+#
+
+UNAME=/bin/uname
+MAKE=/usr/bin/make
+CURL=/usr/bin/curl
+MKDIR=/bin/mkdir
+TAR=/bin/tar
+RM=/bin/rm
+OPENSSL_CMD=/usr/bin/openssl
+LN="/bin/ln -sf"
