@@ -9,4 +9,4 @@ run_unit_tests:
 	# mkdir .cover
 	for PKG in $(PACKAGES) ; do \
 		FULLPKG=github.com/IBM-Bluemix/golang-openssl-wrapper/$$PKG ; \
-		go test -v -coverprofile=coverage.txt -covermode=atomic $$FULLPKG ; done
+		go test -v -coverprofile=$$PKG/coverage.txt -covermode=atomic $$FULLPKG ; done
