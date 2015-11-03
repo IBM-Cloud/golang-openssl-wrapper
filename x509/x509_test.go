@@ -8,7 +8,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("X509", func() {
+var _ = XDescribe("X509", func() {
 	var x X509
 	It("Should create a new X509 instance", func() {
 		x = X509_new()
