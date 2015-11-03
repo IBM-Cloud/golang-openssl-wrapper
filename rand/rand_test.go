@@ -22,24 +22,4 @@ var _ = Describe("Rand", func() {
 			Expect(len(string(buf))).To(Equal(50))
 		})
 	})
-
-	Context("Emulating the go native API", func() {
-		var l1, l2 int
-		var err error
-
-		It("Returns a valid/random sequence of bytes", func() {
-			buf := make([]byte, seqlen)
-			l1, err = Read(buf)
-			Expect(l1).To(Equal(len(buf)))
-			Expect(err).NotTo(HaveOccurred())
-
-			newBuf := make([]byte, seqlen)
-			l2, err = Read(newBuf)
-			s1 := string(buf)
-			s2 := string(newBuf)
-
-			Expect(err).NotTo(HaveOccurred())
-			Expect(s1).NotTo(Equal(s2))
-		})
-	})
 })
