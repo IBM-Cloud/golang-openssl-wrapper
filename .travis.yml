@@ -10,3 +10,7 @@ env:
 before_install:
   - ./scripts/install_swig.sh /tmp/deps
   - ./scripts/install_openssl.sh /tmp/deps
+  - pip install --user codecov
+
+after_success:
+  - codecov
