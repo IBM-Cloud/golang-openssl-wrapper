@@ -6,7 +6,9 @@ go:
 
 env:
   - PATH=$PATH:/usr/local/bin:/tmp/deps/bin
+  - LD_LIBRARY_PATH=/tmp/deps/ssl/lib:$LD_LIBRARY_PATH
+  - LD_RUN_PATH=/tmp/deps/ssl/lib:$LD_RUN_PATH
 
 before_install:
   - ./scripts/install_swig.sh /tmp/deps
-#   # - ./install_openssl.sh
+  - ./scripts/install_openssl.sh /tmp/deps

@@ -20,9 +20,19 @@ FIPS_REL=2.0.10
 OSSL=openssl-${OSSL_REL}
 
 # Installation paths
-I_BASE=/usr/local
+if [[ $# -ge 1 ]]; then
+	I_BASE=$1
+else
+	I_BASE=/usr/local
+fi
+export FIPSDIR=${I_BASE}/ssl/fips-2.0
+
 OSSL_PREFIX=${I_BASE}/${OSSL}
 OSSL_CONFIG="./config --prefix=${OSSL_PREFIX} fips shared"
+
+#
+# Whoops, bug here
+#
 
 if [[ $1 = "ecp" ]]; then
 	FIPS=openssl-fips-ecp-${FIPS_REL}
@@ -162,7 +172,7 @@ if [[ -d ${OSSL_PREFIX} ]]; then
 	fatal "${OSSL_PREFIX} exists already, exiting"
 fi
 
-$MKDIR ${OSSL_PREFIX} || fatal "Unable to create installation directory ${OSSL_PREFIX}"
+$MKDIR -p ${OSSL_PREFIX} || fatal "Unable to create installation directory ${OSSL_PREFIX}"
 
 if [[ -e ${I_BASE}/ssl && -L ${I_BASE}/ssl ]]; then
 	warn "Symlink ${I_BASE}/ssl already exists, this installation will modify target"
