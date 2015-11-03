@@ -12,7 +12,7 @@ before_install:
   - ./scripts/install_openssl.sh /tmp/deps
   - go get github.com/onsi/gomega
   - go get github.com/onsi/ginkgo
-  - go get code.google.com/p/go.tools/cmd/cover
+  - go get golang.org/x/tools/cmd/cover
   - pip install --user codecov
 
 script:
