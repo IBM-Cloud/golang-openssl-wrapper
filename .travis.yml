@@ -10,7 +10,14 @@ env:
 before_install:
   - ./scripts/install_swig.sh /tmp/deps
   - ./scripts/install_openssl.sh /tmp/deps
+  - go get github.com/onsi/gomega
+  - go get github.com/onsi/ginkgo
+  - go get code.google.com/p/go.tools/cmd/cover
   - pip install --user codecov
+
+script:
+  - go test -coverprofile=coverage.txt -covermode=atomic
 
 after_success:
   - codecov
+  - bash <(curl -s https://codecov.io/bash)
