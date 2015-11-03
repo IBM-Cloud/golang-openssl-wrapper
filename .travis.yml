@@ -15,8 +15,8 @@ before_install:
   - go get golang.org/x/tools/cmd/cover
   - pip install --user codecov
 
-script:
-  - go test -v -coverprofile=coverage.txt -covermode=atomic ./...
+# script:
+#   - go test -v -coverprofile=coverage.txt -covermode=atomic ./...
 
 after_success:
   - codecov
