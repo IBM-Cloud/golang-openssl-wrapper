@@ -124,7 +124,7 @@ func (r *response) Write(buf []byte) (int, error) {
 
 func (r *response) WriteHeader(s int) {
 	r.sentStatus = true
-	r.Conn.Write([]byte(fmt.Sprintf("HTTP/1.1 %d\r\n", s)))
+	r.Conn.Write([]byte(fmt.Sprintf("HTTP/1.1 %d %s\r\n", s, http.StatusText(s))))
 }
 
 /*
