@@ -8,6 +8,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"path/filepath"
 )
 
 /*
@@ -190,6 +191,16 @@ func (s *Server) ListenAndServeTLS(cf, kf string) error {
 
 	if s.ErrorLog == nil {
 		s.ErrorLog = log.New(os.Stdout, "server: ", log.LstdFlags|log.Lshortfile)
+	}
+
+	cf, e = filepath.Abs(cf)
+	if e != nil {
+		return e
+	}
+
+	kf, e = filepath.Abs(kf)
+	if e != nil {
+		return e
 	}
 
 	ctx, e := ctxInit("", s.method)
