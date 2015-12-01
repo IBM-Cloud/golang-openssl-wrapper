@@ -54,6 +54,10 @@ extern int FIPS_mode(void);
 
 extern void ERR_load_crypto_strings(void);
 extern void ERR_free_strings(void);
+unsigned long ERR_get_error(void);
+
+%apply char *CHARBUF {char *errbuf};
+char *ERR_error_string(unsigned long e, char *errbuf);
 
 /*
  * From openssl/evp.h
@@ -168,3 +172,5 @@ const EVP_CIPHER *EVP_aes_256_cbc(void);
 const EVP_CIPHER *EVP_aes_256_cfb(void);
 const EVP_CIPHER *EVP_aes_256_gcm(void);
 const EVP_CIPHER *EVP_des_cbc(void);
+
+int EVP_CIPHER_block_size(EVP_CIPHER *e);
