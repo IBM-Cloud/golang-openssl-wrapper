@@ -153,9 +153,7 @@ func NewDESCBC(key string) CipherMethod {
 		key: key,
 	}
 
-	d := descbc{c}
-
-	return d
+	return descbc{c}
 }
 
 type descbc struct {
