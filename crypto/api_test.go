@@ -14,35 +14,11 @@ var _ = Describe("Api", func() {
 		plaintext = "some plaintext"
 	)
 
-	Context("Symmetric encryption with API", func() {
-		BeforeEach(func() {
-			FIPS_mode_set(0)
-		})
+	BeforeEach(func() {
+		FIPS_mode_set(0)
+	})
 
-		It("should encrypt and decrypt successfully", func() {
-			cipher := NewAESCBC("some key")
-			Expect(cipher).NotTo(BeNil())
-
-			enc := NewEncrypter(cipher, "some iv")
-			Expect(enc).NotTo(BeNil())
-
-			buf := make([]byte, len(plaintext)+enc.BlockSize)
-			copy(buf, plaintext)
-			Expect(buf[:len(plaintext)]).To(Equal([]byte(plaintext)))
-
-			re, e := enc.Encrypt(buf, []byte(plaintext))
-			Expect(e).NotTo(HaveOccurred())
-
-			dec := NewDecrypter(cipher, "some iv")
-			Expect(dec).NotTo(BeNil())
-
-			rd, e := dec.Decrypt(buf, buf[:re])
-			Expect(e).NotTo(HaveOccurred())
-			Expect(rd).To(Equal(len(plaintext)))
-
-			Expect(buf[:rd]).To(Equal([]byte(plaintext)))
-		})
-
+	Context("Decrypter and encrypter", func() {
 		It("should disallow the use of a non-approved algorithm in FIPS mode", func() {
 			FIPS_mode_set(1)
 
@@ -79,16 +55,28 @@ var _ = Describe("Api", func() {
 			Expect(enc).NotTo(BeNil())
 
 			eb1 := make([]byte, len(plaintext)+enc.BlockSize)
-			_, e := enc.Encrypt(eb1, []byte(plaintext))
+			re1, e := enc.Encrypt(eb1, []byte(plaintext))
 			Expect(e).NotTo(HaveOccurred())
 
 			enc = enc.SetIV("some other iv")
 
 			eb2 := make([]byte, len(plaintext)+enc.BlockSize)
-			_, e = enc.Encrypt(eb2, []byte(plaintext))
+			re2, e := enc.Encrypt(eb2, []byte(plaintext))
 			Expect(e).NotTo(HaveOccurred())
 
 			Expect(eb1).NotTo(Equal(eb2))
+
+			dec := Decrypter(enc)
+
+			rd2, e := dec.Decrypt(eb2, eb2[:re2])
+			Expect(e).NotTo(HaveOccurred())
+			Expect(eb2[:rd2]).To(Equal([]byte(plaintext)))
+
+			dec = dec.SetIV("some iv")
+
+			rd1, e := dec.Decrypt(eb1, eb1[:re1])
+			Expect(e).NotTo(HaveOccurred())
+			Expect(eb1[:rd1]).To(Equal([]byte(plaintext)))
 		})
 
 		It("should be able to reuse an existing encrypter as a decrypter", func() {
@@ -109,7 +97,32 @@ var _ = Describe("Api", func() {
 			Expect(e).NotTo(HaveOccurred())
 
 			Expect(buf[:rd]).To(Equal([]byte(plaintext)))
+		})
+	})
 
+	Context("Symmetric encryption with API", func() {
+		It("should encrypt and decrypt successfully", func() {
+			cipher := NewAESCBC("some key")
+			Expect(cipher).NotTo(BeNil())
+
+			enc := NewEncrypter(cipher, "some iv")
+			Expect(enc).NotTo(BeNil())
+
+			buf := make([]byte, len(plaintext)+enc.BlockSize)
+			copy(buf, plaintext)
+			Expect(buf[:len(plaintext)]).To(Equal([]byte(plaintext)))
+
+			re, e := enc.Encrypt(buf, []byte(plaintext))
+			Expect(e).NotTo(HaveOccurred())
+
+			dec := NewDecrypter(cipher, "some iv")
+			Expect(dec).NotTo(BeNil())
+
+			rd, e := dec.Decrypt(buf, buf[:re])
+			Expect(e).NotTo(HaveOccurred())
+			Expect(rd).To(Equal(len(plaintext)))
+
+			Expect(buf[:rd]).To(Equal([]byte(plaintext)))
 		})
 	})
 })
