@@ -72,6 +72,16 @@ var _ = Describe("Crypto", func() {
 		})
 	})
 
+	Context("Getting the block size from a cipher", func() {
+		It("should get a block size of 16 bytes from AES-256-CBC", func() {
+			Expect(EVP_CIPHER_block_size(EVP_aes_256_cbc())).To(Equal(16))
+		})
+
+		It("should get a block size of 8 bytes from DES-CBC", func() {
+			Expect(EVP_CIPHER_block_size(EVP_des_cbc())).To(Equal(8))
+		})
+	})
+
 	Context("Encrypting in CBC mode with FIPS mode disabled", func() {
 		BeforeEach(func() {
 			/* Be sure FIPS mode is disabled */
