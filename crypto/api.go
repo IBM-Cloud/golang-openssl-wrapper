@@ -65,8 +65,6 @@ func (c Cipher) Bytes(dst, src []byte) (int, error) {
 	}
 	copy(out[pos:read], buf[:end])
 
-	read = copy(dst, out[:read])
-
 	EVP_CIPHER_CTX_cleanup(c.ctx)
 
 	return copy(dst, out[:read]), nil
