@@ -28,8 +28,12 @@ var _ = Describe("Api", func() {
 			enc := NewEncrypter(cipher, "some iv")
 			Expect(enc).NotTo(BeNil())
 
-			buf := make([]byte, 20)
+			buf := make([]byte, len(plaintext)+enc.BlockSize)
 			_, e := enc.Encrypt(buf, buf)
+			Expect(e).To(HaveOccurred())
+
+			dec := Decrypter(enc)
+			_, e = dec.Decrypt(buf, buf)
 			Expect(e).To(HaveOccurred())
 		})
 
@@ -42,8 +46,12 @@ var _ = Describe("Api", func() {
 			enc := NewEncrypter(cipher, "some iv")
 			Expect(enc).NotTo(BeNil())
 
-			buf := make([]byte, 20)
-			_, e := enc.Encrypt(buf, buf)
+			buf := make([]byte, len(plaintext)+enc.BlockSize)
+			re, e := enc.Encrypt(buf, []byte(plaintext))
+			Expect(e).NotTo(HaveOccurred())
+
+			dec := Decrypter(enc)
+			_, e = dec.Decrypt(buf, buf[:re])
 			Expect(e).NotTo(HaveOccurred())
 		})
 
@@ -97,6 +105,19 @@ var _ = Describe("Api", func() {
 			Expect(e).NotTo(HaveOccurred())
 
 			Expect(buf[:rd]).To(Equal([]byte(plaintext)))
+		})
+
+		It("should throw an error if Cipher.final fails", func() {
+			cipher := NewAESCBC("some key")
+			Expect(cipher).NotTo(BeNil())
+
+			dec := NewDecrypter(cipher, "some iv")
+			Expect(dec).NotTo(BeNil())
+
+			buf := make([]byte, 0)
+
+			_, e := dec.Decrypt(buf, buf)
+			Expect(e).To(HaveOccurred())
 		})
 	})
 
