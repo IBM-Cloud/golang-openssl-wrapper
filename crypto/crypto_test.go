@@ -31,6 +31,26 @@ var _ = Describe("Crypto", func() {
 		OpenSSL_add_all_algorithms()
 		OPENSSL_config("")
 	})
+	Context("Enabling and disabling FIPS mode with API", func() {
+		BeforeEach(func() {
+			FIPS_mode_set(0)
+			Expect(FIPS_mode()).To(Equal(0))
+			})
+
+		It("should return the current setting", func() {
+			Expect(FIPSMode(1)).To(Equal(1))
+			Expect(FIPS_mode()).To(Equal(1))
+		})
+
+		It("should return disabled FIPS mode", func() {
+			Expect(FIPSMode(0)).To(Equal(0))
+			Expect(FIPS_mode()).To(Equal(0))	
+		})
+
+		AfterEach(func() {
+			FIPSMode(0)
+			})
+	})
 
 	Context("Enabling and disabling FIPS mode", func() {
 		It("should return the current setting", func() {
