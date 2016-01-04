@@ -7,7 +7,13 @@
 #include <openssl/ossl_typ.h>
 #include <openssl/bio.h>
 #include <openssl/tls1.h>
+#include <openssl/x509.h>
 %}
+
+%include "../include/ossl_typemaps.i"
+
+#define SSL_FILETYPE_PEM    1
+#define SSL_FILETYPE_ASN1   2
 
 /*
  * Conditional compilation directives for stuff we don't want to support yet
@@ -60,10 +66,22 @@ int SSL_CTX_load_verify_locations(SSL_CTX *ctx, const char *CAfile,
                                     const char *CApath);
 
 SSL *SSL_new(SSL_CTX *ctx);
+int SSL_accept(SSL *ssl);
+
 void SSL_free(SSL *ssl);
 int SSL_set_cipher_list(SSL *ssl, const char *str);
 long SSL_set_tlsext_host_name(SSL *ssl, char *name);
 int SSL_connect(SSL *ssl);
 int SSL_get_error(SSL *ssl, int ret);
+int SSL_set_fd(SSL *ssl, int fd);
+int SSL_get_fd(SSL *ssl);
 
+int SSL_CTX_use_certificate_file(SSL_CTX *ctx, const char *file, int type);
+int SSL_CTX_use_PrivateKey_file(SSL_CTX *ctx, const char *file, int type);
+int SSL_CTX_check_private_key(const SSL_CTX *ctx);
 
+%typemap(gotype) const void *buf %{[]byte%}
+int SSL_write(SSL *ssl, const void *buf, int num);
+
+%apply char *CHARBUF { void *buf };
+int SSL_read(SSL *ssl, void *buf, int num);
