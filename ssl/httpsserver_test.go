@@ -3,6 +3,7 @@ package ssl_test
 import (
 	. "github.com/IBM-Bluemix/golang-openssl-wrapper/ssl"
 
+	"net/http"
 	"os"
 	"os/exec"
 	"time"
@@ -55,6 +56,11 @@ var _ = Describe("Httpsserver", func() {
 		Expect(i).To(BeNumerically(">", 0))
 		Expect(string(body[:i])).To(Equal("Using gorilla/mux"))
 		Expect(res.Body.Close()).To(BeNil())
+	})
+
+	It("Should not try handling any non-HTTPS requests", func() {
+		_, e := http.Get("http://localhost:8443/aloha")
+		Expect(e).To(HaveOccurred())
 	})
 })
 

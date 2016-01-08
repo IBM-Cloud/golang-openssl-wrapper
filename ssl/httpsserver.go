@@ -245,10 +245,12 @@ func (s *Server) Serve(l net.Listener) error {
 		f *os.File
 	)
 
-	check := func(e error) {
-		if e != nil {
+	check := func(e error) bool {
+		r := (e == nil)
+		if !r {
 			s.ErrorLog.Printf("ERROR: %s\n", e)
 		}
+		return r
 	}
 
 	s.listener = l
@@ -280,21 +282,25 @@ func (s *Server) Serve(l net.Listener) error {
 		oc := c.(Conn)
 		SSL_set_fd(oc.ctx, oc.fd)
 
-		check(oc.getHandshake())
+		if !check(oc.getHandshake()) {
+			oc.Close()
+			continue
+		}
 
 		buf := bufio.NewReader(oc)
 		req, e := http.ReadRequest(buf)
-		check(e)
 
-		res := &response{
-			Conn:    oc,
-			Headers: make(http.Header),
-			req:     req,
+		if check(e) && req != nil {
+			res := &response{
+				Conn:    oc,
+				Headers: make(http.Header),
+				req:     req,
+			}
+
+			s.Handler.ServeHTTP(res, req)
+
+			check(req.Body.Close())
 		}
-
-		s.Handler.ServeHTTP(res, req)
-
-		check(req.Body.Close())
 
 		check(oc.Close())
 	}
